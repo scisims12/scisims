@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive simulations of Einstein's greatest experiments — photoelectric effect, E=mc², twin paradox, gravitational lensing, Brownian motion, and spacetime curvature.">
+  <meta name="keywords" content="Einstein experiments, interactive physics, photoelectric effect, E=mc2, twin paradox, gravitational lensing, special relativity">
+  <meta property="og:title" content="Einstein's Universe — Live Experiments">
+  <meta property="og:description" content="Interactive simulations of Einstein's greatest experiments — photoelectric effect, E=mc², twin paradox, gravitational lensing, Brownian motion, and spacetime curvature.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+<title>Einstein's Universe — Live Experiments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Crimson+Pro:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f0e8;
+    --gold: #c9a84c;
+    --amber: #e8b84b;
+    --rust: #b84c22;
+    --cream: #faf7f0;
+    --muted: #7a7060;
+    --glow: rgba(201,168,76,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Crimson Pro', serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor { position:fixed; width:12px; height:12px; background:var(--gold); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:transform 0.1s, width 0.2s, height 0.2s; mix-blend-mode:difference; }
+  .cursor-ring { position:fixed; width:36px; height:36px; border:1px solid var(--gold); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:all 0.15s ease; opacity:0.5; }
+  body:hover .cursor, body:hover .cursor-ring { opacity: 1; }
+
+  /* Hero */
+  #hero {
+    min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center;
+    position:relative; overflow:hidden; text-align:center; padding:4rem 2rem;
+  }
+
+  .stars-bg {
+    position:absolute; inset:0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(184,76,34,0.05) 0%, transparent 50%),
+                #0a0a0f;
+  }
+
+  .star { position:absolute; background:#fff; border-radius:50%; animation:twinkle var(--dur) ease-in-out infinite; }
+  @keyframes twinkle { 0%,100%{opacity:0.2} 50%{opacity:1} }
+
+  .hero-year {
+    font-family:'Space Mono', monospace; font-size:0.7rem; letter-spacing:0.5em;
+    color:var(--gold); text-transform:uppercase; margin-bottom:1.5rem;
+    animation: fadeUp 1s ease both;
+  }
+  .hero-title {
+    font-family:'Playfair Display', serif; font-size:clamp(3rem,10vw,8rem);
+    font-weight:900; line-height:0.95; letter-spacing:-0.02em;
+    animation: fadeUp 1s 0.2s ease both;
+  }
+  .hero-title em { font-style:italic; color:var(--gold); }
+  .hero-sub {
+    font-size:clamp(1rem,2vw,1.4rem); color:var(--muted); max-width:520px;
+    margin:1.5rem auto 0; font-weight:300; line-height:1.6;
+    animation: fadeUp 1s 0.4s ease both;
+  }
+  .hero-line {
+    width:1px; height:80px; background:linear-gradient(to bottom, var(--gold), transparent);
+    margin:3rem auto 0; animation: fadeUp 1s 0.6s ease both;
+  }
+
+  /* Progress bar */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: linear-gradient(to right, var(--rust), var(--gold));
+    z-index: 200; width: 0%; transition: width 0.1s linear;
+  }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+  /* Nav pills */
+  #nav {
+    position:sticky; top:0; z-index:100; padding:1rem 2rem;
+    background:rgba(10,10,15,0.9); backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(201,168,76,0.1);
+    display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center;
+  }
+  .nav-pill {
+    font-family:'Space Mono',monospace; font-size:0.65rem; letter-spacing:0.12em;
+    text-transform:uppercase; padding:0.45rem 1rem; border:1px solid rgba(201,168,76,0.2);
+    background:transparent; color:var(--muted); cursor:pointer; border-radius:2px;
+    transition:all 0.25s; white-space:nowrap;
+  }
+  .nav-pill:hover, .nav-pill.active { background:var(--gold); color:var(--ink); border-color:var(--gold); }
+
+  /* Section layout */
+  .experiment {
+    min-height:100vh; display:grid; grid-template-columns:1fr 1fr;
+    gap:0; border-top:1px solid rgba(201,168,76,0.08);
+    opacity:0; transform:translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .experiment.visible { opacity:1; transform:translateY(0); }
+  .experiment:nth-child(even) { direction:rtl; }
+  .experiment:nth-child(even) > * { direction:ltr; }
+
+  .exp-info {
+    padding:5rem 4rem; display:flex; flex-direction:column; justify-content:center;
+    background:var(--ink); position:relative; overflow:hidden;
+  }
+  .exp-info::before {
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(ellipse at 0% 50%, rgba(201,168,76,0.04), transparent 70%);
+  }
+
+  .exp-number {
+    font-family:'Space Mono',monospace; font-size:5rem; font-weight:700;
+    color:rgba(201,168,76,0.08); position:absolute; top:2rem; right:3rem; line-height:1;
+  }
+  .exp-tag {
+    font-family:'Space Mono',monospace; font-size:0.65rem; letter-spacing:0.4em;
+    color:var(--gold); text-transform:uppercase; margin-bottom:1rem;
+  }
+  .exp-title {
+    font-family:'Playfair Display',serif; font-size:clamp(1.8rem,3vw,2.8rem);
+    font-weight:700; line-height:1.1; margin-bottom:1rem; letter-spacing:-0.01em;
+  }
+  .exp-year {
+    font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--rust);
+    margin-bottom:1.5rem; letter-spacing:0.2em;
+  }
+  .exp-desc { font-size:1.05rem; line-height:1.75; color:rgba(245,240,232,0.7); max-width:44ch; font-weight:300; }
+  .exp-formula {
+    font-family:'Space Mono',monospace; font-size:1.1rem; color:var(--amber);
+    background:rgba(201,168,76,0.07); border:1px solid rgba(201,168,76,0.15);
+    padding:0.8rem 1.2rem; margin-top:1.5rem; border-radius:3px; display:inline-block;
+  }
+  .exp-insight {
+    margin-top:1.5rem; padding:1rem 1.2rem; border-left:2px solid var(--gold);
+    background:rgba(201,168,76,0.04); font-size:0.95rem;
+    color:rgba(245,240,232,0.6); font-style:italic; line-height:1.6;
+  }
+
+  /* Canvas area */
+  .exp-canvas {
+    background:#050508; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:2rem;
+    position:relative; overflow:hidden; min-height:500px;
+  }
+  canvas { display:block; max-width:100%; border-radius:4px; }
+  .canvas-label {
+    font-family:'Space Mono',monospace; font-size:0.6rem; letter-spacing:0.3em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:1rem;
+  }
+
+  /* Controls */
+  .controls { display:flex; flex-direction:column; gap:0.8rem; width:100%; max-width:340px; margin-top:1.5rem; }
+  .ctrl-row { display:flex; align-items:center; gap:0.8rem; }
+  .ctrl-label { font-family:'Space Mono',monospace; font-size:0.6rem; color:var(--muted); letter-spacing:0.15em; min-width:80px; }
+  input[type=range] {
+    flex:1; -webkit-appearance:none; height:2px; background:rgba(201,168,76,0.2);
+    border-radius:1px; outline:none; cursor:grab;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; width:12px; height:12px; background:var(--gold);
+    border-radius:50%; cursor:grab; transition:transform 0.2s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.4); }
+  .ctrl-val { font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--gold); min-width:48px; text-align:right; }
+
+  .btn {
+    font-family:'Space Mono',monospace; font-size:0.65rem; letter-spacing:0.15em;
+    text-transform:uppercase; padding:0.6rem 1.4rem; border:1px solid var(--gold);
+    background:transparent; color:var(--gold); cursor:pointer; border-radius:2px;
+    transition:all 0.2s; margin-top:0.5rem;
+  }
+  .btn:hover { background:var(--gold); color:var(--ink); }
+  .btn:active { transform: scale(0.97); }
+
+  /* Tooltip */
+  .exp-canvas::after {
+    content: attr(data-tip);
+    position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%);
+    font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 0.15em;
+    color: rgba(201,168,76,0.35); text-transform: uppercase; pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* Responsive */
+  @media(max-width:900px) {
+    .experiment { grid-template-columns:1fr; }
+    .experiment:nth-child(even) { direction:ltr; }
+    .exp-info { padding:3rem 2rem; }
+    .exp-canvas { min-height:380px; }
+  }
+
+  /* Footer */
+  footer {
+    text-align:center; padding:4rem 2rem;
+    border-top:1px solid rgba(201,168,76,0.1);
+    font-family:'Space Mono',monospace; font-size:0.65rem;
+    letter-spacing:0.2em; color:var(--muted); text-transform:uppercase;
+  }
+  footer span { color:var(--gold); }
+
+  /* Back to top */
+  #back-top {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 150;
+    width: 40px; height: 40px; background: rgba(10,10,15,0.8);
+    border: 1px solid rgba(201,168,76,0.3); border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; opacity: 0; transition: opacity 0.3s, background 0.2s;
+    font-size: 1rem; color: var(--gold);
+  }
+  #back-top.visible { opacity: 1; }
+  #back-top:hover { background: var(--gold); color: var(--ink); }
+</style>
+</head>
+<body>
+
+<style>
+#sci-nav{position:sticky;top:0;z-index:9000;background:rgba(8,10,20,0.97);
+  backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,0.07);
+  padding:0.55rem 1.5rem;display:flex;align-items:center;gap:0.5rem;
+  flex-wrap:wrap;font-family:'Inter',system-ui,sans-serif;font-size:0.72rem;
+  letter-spacing:0.04em;}
+#sci-nav a{color:rgba(255,255,255,0.5);text-decoration:none;padding:0.3rem 0.7rem;
+  border-radius:4px;transition:all 0.2s;white-space:nowrap;}
+#sci-nav a:hover{color:#fff;background:rgba(255,255,255,0.07);}
+#sci-nav a.active{color:#f0854a;border-bottom:1px solid #f0854a;}
+#sci-nav .nav-brand{font-weight:700;color:#fff;margin-right:0.5rem;font-size:0.78rem;}
+@media(max-width:600px){#sci-nav{padding:0.4rem 0.8rem;gap:0.3rem;font-size:0.65rem;}}
+</style>
+<nav id="sci-nav">
+  <span class="nav-brand">⚛ SciSims</span>
+  <a href="einstein_experiments.html" class="active">Einstein's Universe</a>
+  <a href="double_slit_experiment.html">Double Slit</a>
+  <a href="photoelectric_effect_simulation.html">Photoelectric Effect</a>
+  <a href="rutherford_gold_foil_experiment.html">Rutherford</a>
+  <a href="india_rainfall_report_25years.html">India Rainfall</a>
+  <a href="india_rainfall_report_2026_prediction.html">2026 Forecast</a>
+</nav>
+
+
+<div id="progress-bar"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div id="back-top" title="Back to top">↑</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="stars-bg" id="starsBg"></div>
+  <p class="hero-year">1879 — 1955 · Albert Einstein</p>
+  <h1 class="hero-title">The Mind<br>That Bent <em>Reality</em></h1>
+  <p class="hero-sub">Six landmark experiments and thought experiments — live, interactive, and alive. Explore Einstein's greatest ideas through interactive simulations.</p>
+  <div class="hero-line"></div>
+</section>
+
+<!-- NAV -->
+<nav id="nav">
+  <button class="nav-pill active" onclick="scrollToSection('exp1')">Photoelectric</button>
+  <button class="nav-pill" onclick="scrollToSection('exp2')">E=mc²</button>
+  <button class="nav-pill" onclick="scrollToSection('exp3')">Twin Paradox</button>
+  <button class="nav-pill" onclick="scrollToSection('exp4')">Gravity Lens</button>
+  <button class="nav-pill" onclick="scrollToSection('exp5')">Brownian Motion</button>
+  <button class="nav-pill" onclick="scrollToSection('exp6')">Space-Time</button>
+</nav>
+
+<!-- EXP 1 · PHOTOELECTRIC EFFECT -->
+<section class="experiment" id="exp1">
+  <div class="exp-info">
+    <span class="exp-number">01</span>
+    <p class="exp-tag">Nobel Prize 1921 · Quantum Theory</p>
+    <h2 class="exp-title">The Photoelectric Effect</h2>
+    <p class="exp-year">1905 — Annus Mirabilis</p>
+    <p class="exp-desc">Einstein showed that light is not a continuous wave but arrives in discrete packets — photons. When light hits a metal surface, individual photons knock out electrons only if each photon has enough energy. Frequency matters; intensity merely increases electron count.</p>
+    <div class="exp-formula">E = hf &nbsp;·&nbsp; KE = hf − φ</div>
+    <div class="exp-insight">"For this discovery of the law of the photoelectric effect" — Nobel Committee, 1921. This shattered classical wave theory of light.</div>
+  </div>
+  <div class="exp-canvas" data-tip="Adjust frequency &amp; intensity · Click to fire">
+    <p class="canvas-label">Live Simulation — Photoelectric Effect</p>
+    <canvas id="c1" width="400" height="300"></canvas>
+    <div class="controls">
+      <div class="ctrl-row">
+        <span class="ctrl-label">Frequency</span>
+        <input type="range" id="freq" min="1" max="10" value="5" step="0.1">
+        <span class="ctrl-val" id="freqVal">5.0</span>
+      </div>
+      <div class="ctrl-row">
+        <span class="ctrl-label">Intensity</span>
+        <input type="range" id="intens" min="1" max="10" value="5" step="0.1">
+        <span class="ctrl-val" id="intensVal">5.0</span>
+      </div>
+      <button class="btn" id="fireBtn">Fire Photons</button>
+    </div>
+  </div>
+</section>
+
+<!-- EXP 2 · E = MC² -->
+<section class="experiment" id="exp2">
+  <div class="exp-info">
+    <span class="exp-number">02</span>
+    <p class="exp-tag">Special Relativity · Mass-Energy Equivalence</p>
+    <h2 class="exp-title">E = mc²</h2>
+    <p class="exp-year">1905 — Special Relativity Paper</p>
+    <p class="exp-desc">The most famous equation in physics: mass and energy are the same thing, related by the square of the speed of light. A tiny mass contains an enormous amount of energy. This underpins nuclear reactions, particle physics, and our understanding of stellar fusion.</p>
+    <div class="exp-formula">E = mc² = 9×10¹⁶ J per kg</div>
+    <div class="exp-insight">Even 1 gram of matter, if fully converted, releases ~90 terajoules — enough to power a city for years.</div>
+  </div>
+  <div class="exp-canvas" data-tip="Set mass · Click to annihilate">
+    <p class="canvas-label">Mass → Energy Converter</p>
+    <canvas id="c2" width="400" height="300"></canvas>
+    <div class="controls">
+      <div class="ctrl-row">
+        <span class="ctrl-label">Mass (g)</span>
+        <input type="range" id="mass" min="0.1" max="100" value="1" step="0.1">
+        <span class="ctrl-val" id="massVal">1.0</span>
+      </div>
+      <button class="btn" id="annihilateBtn">Annihilate!</button>
+    </div>
+  </div>
+</section>
+
+<!-- EXP 3 · TWIN PARADOX -->
+<section class="experiment" id="exp3">
+  <div class="exp-info">
+    <span class="exp-number">03</span>
+    <p class="exp-tag">Special Relativity · Time Dilation</p>
+    <h2 class="exp-title">The Twin Paradox</h2>
+    <p class="exp-year">1905 — Time Dilation Consequence</p>
+    <p class="exp-desc">One twin rockets away at near light-speed and returns. Time dilation means the traveling twin ages less. The faster you move through space, the slower you move through time. GPS satellites must correct for this effect or navigation errors would accumulate at ~10km/day.</p>
+    <div class="exp-formula">Δt' = Δt · √(1 − v²/c²)</div>
+    <div class="exp-insight">At 99% the speed of light, 1 year of travel equals ~7 years on Earth. You could reach the future, but never return to the past.</div>
+  </div>
+  <div class="exp-canvas" data-tip="Set speed · Launch twin · Watch ages diverge">
+    <p class="canvas-label">Twin Clock Simulation</p>
+    <canvas id="c3" width="400" height="300"></canvas>
+    <div class="controls">
+      <div class="ctrl-row">
+        <span class="ctrl-label">Speed (%c)</span>
+        <input type="range" id="speed" min="10" max="99" value="80" step="1">
+        <span class="ctrl-val" id="speedVal">80%</span>
+      </div>
+      <button class="btn" id="launchBtn">Launch Twin</button>
+    </div>
+  </div>
+</section>
+
+<!-- EXP 4 · GRAVITATIONAL LENSING -->
+<section class="experiment" id="exp4">
+  <div class="exp-info">
+    <span class="exp-number">04</span>
+    <p class="exp-tag">General Relativity · 1919 Solar Eclipse</p>
+    <h2 class="exp-title">Gravitational Lensing</h2>
+    <p class="exp-year">1915–1919 — Proved by Eddington</p>
+    <p class="exp-desc">General Relativity predicts that massive objects warp spacetime, bending the path of light. During the 1919 solar eclipse, Arthur Eddington measured stars near the Sun displaced exactly as Einstein predicted — twice what Newton's gravity alone would allow.</p>
+    <div class="exp-formula">θ = 4GM / (rc²)</div>
+    <div class="exp-insight">"Lights all askew in the heavens" — New York Times, 1919. Einstein became a global celebrity overnight after this confirmation.</div>
+  </div>
+  <div class="exp-canvas" data-tip="Drag mass &amp; light position sliders">
+    <p class="canvas-label">Live Lens Simulation</p>
+    <canvas id="c4" width="400" height="300"></canvas>
+    <div class="controls">
+      <div class="ctrl-row">
+        <span class="ctrl-label">Mass</span>
+        <input type="range" id="lmass" min="1" max="100" value="40" step="1">
+        <span class="ctrl-val" id="lmassVal">40</span>
+      </div>
+      <div class="ctrl-row">
+        <span class="ctrl-label">Light Y</span>
+        <input type="range" id="lypos" min="10" max="140" value="80" step="1">
+        <span class="ctrl-val" id="lyposVal">80</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXP 5 · BROWNIAN MOTION -->
+<section class="experiment" id="exp5">
+  <div class="exp-info">
+    <span class="exp-number">05</span>
+    <p class="exp-tag">Statistical Physics · Atomic Theory</p>
+    <h2 class="exp-title">Brownian Motion</h2>
+    <p class="exp-year">1905 — Proof of Atoms</p>
+    <p class="exp-desc">Pollen grains suspended in water jiggle constantly and randomly. Einstein proved this motion is caused by billions of invisible water molecules constantly colliding with the pollen. His mathematical treatment provided the first concrete proof that atoms and molecules actually exist.</p>
+    <div class="exp-formula">⟨x²⟩ = 2Dt &nbsp;·&nbsp; D = kT / (6πηr)</div>
+    <div class="exp-insight">This single paper ended decades of debate about whether atoms were real or merely a useful fiction. Jean Perrin's experiments confirmed Einstein's equations precisely.</div>
+  </div>
+  <div class="exp-canvas" data-tip="Increase temperature to see chaos emerge">
+    <p class="canvas-label">Molecular Collision Simulation</p>
+    <canvas id="c5" width="400" height="300"></canvas>
+    <div class="controls">
+      <div class="ctrl-row">
+        <span class="ctrl-label">Temperature</span>
+        <input type="range" id="temp" min="1" max="10" value="4" step="0.5">
+        <span class="ctrl-val" id="tempVal">4.0</span>
+      </div>
+      <div class="ctrl-row">
+        <span class="ctrl-label">Particles</span>
+        <input type="range" id="parts" min="10" max="80" value="30" step="5">
+        <span class="ctrl-val" id="partsVal">30</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXP 6 · SPACETIME FABRIC -->
+<section class="experiment" id="exp6">
+  <div class="exp-info">
+    <span class="exp-number">06</span>
+    <p class="exp-tag">General Relativity · Curvature of Spacetime</p>
+    <h2 class="exp-title">The Fabric of Spacetime</h2>
+    <p class="exp-year">1915 — General Relativity</p>
+    <p class="exp-desc">Einstein revolutionized gravity: it is not a force but the curvature of spacetime caused by mass. Planets orbit the Sun not because they're pulled, but because they follow the curved geometry of spacetime. This framework predicted black holes, gravitational waves, and the expanding universe.</p>
+    <div class="exp-formula">Gμν + Λgμν = (8πG/c⁴) Tμν</div>
+    <div class="exp-insight">Gravitational waves — ripples in spacetime — were directly detected by LIGO in 2015, exactly 100 years after Einstein's theory predicted them.</div>
+  </div>
+  <div class="exp-canvas" data-tip="Increase mass to warp spacetime">
+    <p class="canvas-label">Spacetime Curvature Grid</p>
+    <canvas id="c6" width="400" height="300"></canvas>
+    <div class="controls">
+      <div class="ctrl-row">
+        <span class="ctrl-label">Mass</span>
+        <input type="range" id="smass" min="0" max="100" value="50" step="1">
+        <span class="ctrl-val" id="smassVal">50</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Six Pillars of Modern Physics &nbsp;·&nbsp; <span>Albert Einstein</span> &nbsp;·&nbsp; 1879–1955</p>
+  <p style="margin-top:0.5rem;opacity:0.4">"Imagination is more important than knowledge."</p>
+</footer>
+
+<script>
+/* ─── CURSOR ─────────────────────────────── */
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e=>{ mx=e.clientX; my=e.clientY; cur.style.left=mx+'px'; cur.style.top=my+'px'; });
+(function animCursor(){ rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(animCursor); })();
+
+/* ─── STARS ──────────────────────────────── */
+const sb = document.getElementById('starsBg');
+for(let i=0;i<120;i++){
+  const s=document.createElement('div'); s.className='star';
+  const sz=Math.random()*2+0.5;
+  s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;animation-delay:${Math.random()*4}s`;
+  sb.appendChild(s);
+}
+
+/* ─── PROGRESS BAR ───────────────────────── */
+const progressBar = document.getElementById('progress-bar');
+window.addEventListener('scroll', ()=>{
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  progressBar.style.width = (window.scrollY / h * 100) + '%';
+});
+
+/* ─── BACK TO TOP ────────────────────────── */
+const backTop = document.getElementById('back-top');
+window.addEventListener('scroll', ()=>{ backTop.classList.toggle('visible', window.scrollY > 600); });
+backTop.addEventListener('click', ()=>{ window.scrollTo({top:0, behavior:'smooth'}); });
+
+/* ─── SCROLL REVEAL + NAV SYNC ──────────────────────── */
+const experiments = document.querySelectorAll('.experiment');
+const navPills = document.querySelectorAll('.nav-pill');
+
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      // Sync active nav pill
+      const idx = [...experiments].indexOf(e.target);
+      navPills.forEach((p,i)=>p.classList.toggle('active', i===idx));
+    }
+  });
+},{threshold:0.25});
+experiments.forEach(el=>obs.observe(el));
+
+/* FIX: renamed from scrollTo to avoid shadowing window.scrollTo */
+function scrollToSection(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
+
+/* ════════════════════════════════════════════
+   EXPERIMENT 1 · PHOTOELECTRIC EFFECT
+════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById('c1'), ctx=cv.getContext('2d');
+  const freqSlider=document.getElementById('freq');
+  const intensSlider=document.getElementById('intens');
+  const freqVal=document.getElementById('freqVal');
+  const intensVal=document.getElementById('intensVal');
+  const fireBtn=document.getElementById('fireBtn');
+
+  let photons=[], electrons=[], firing=false, animId=null;
+
+  freqSlider.oninput=()=>{ freqVal.textContent=parseFloat(freqSlider.value).toFixed(1); };
+  intensSlider.oninput=()=>{ intensVal.textContent=parseFloat(intensSlider.value).toFixed(1); };
+
+  function hslForFreq(f){ return `hsl(${270-f*22},100%,70%)`; }
+
+  function spawnPhotons(){
+    const f=parseFloat(freqSlider.value), n=Math.round(parseFloat(intensSlider.value)*2);
+    for(let i=0;i<n;i++){
+      photons.push({ x:-10, y:40+Math.random()*220, vx:3+Math.random()*2, vy:(Math.random()-.5)*0.8, f, color:hslForFreq(f), hit:false });
+    }
+  }
+
+  fireBtn.addEventListener('click',()=>{
+    /* FIX: cancel any existing loop before starting a new one */
+    if(animId) cancelAnimationFrame(animId);
+    spawnPhotons();
+    firing=true;
+    loop();
+  });
+
+  function loop(){
+    ctx.fillStyle='#050508'; ctx.fillRect(0,0,cv.width,cv.height);
+
+    // Metal plate
+    const grd=ctx.createLinearGradient(240,0,280,0);
+    grd.addColorStop(0,'#3a3020'); grd.addColorStop(1,'#5a4a28');
+    ctx.fillStyle=grd; ctx.fillRect(240,20,30,cv.height-40);
+    ctx.strokeStyle=`rgba(201,168,76,0.3)`; ctx.lineWidth=1;
+    ctx.strokeRect(240,20,30,cv.height-40);
+
+    const WORK=4.5;
+    photons=photons.filter(p=>{ if(p.hit) return false;
+      p.x+=p.vx; p.y+=p.vy;
+      ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2);
+      ctx.fillStyle=p.color; ctx.fill();
+      ctx.shadowBlur=8; ctx.shadowColor=p.color; ctx.fill(); ctx.shadowBlur=0;
+      if(p.x>=240 && p.x<=270){
+        if(p.f>WORK){
+          const ke=p.f-WORK;
+          electrons.push({x:270,y:p.y,vx:1+ke*0.4,vy:(Math.random()-.5)*3,life:80});
+        }
+        p.hit=true;
+      }
+      return p.x<cv.width && p.y>0 && p.y<cv.height;
+    });
+
+    electrons=electrons.filter(e=>{
+      e.x+=e.vx; e.y+=e.vy; e.vy+=0.04; e.life--;
+      ctx.beginPath(); ctx.arc(e.x,e.y,2,0,Math.PI*2);
+      ctx.fillStyle=`rgba(100,200,255,${e.life/80})`; ctx.fill();
+      return e.life>0 && e.x<cv.width;
+    });
+
+    // Labels
+    ctx.fillStyle='rgba(201,168,76,0.5)'; ctx.font='10px Space Mono, monospace';
+    ctx.fillText('METAL',243,cv.height-8);
+    ctx.fillStyle='rgba(100,200,255,0.6)'; ctx.fillText('e⁻',305,cv.height/2);
+
+    if(photons.length||electrons.length){
+      animId = requestAnimationFrame(loop);
+    } else {
+      firing=false;
+      animId=null;
+    }
+  }
+  loop();
+})();
+
+/* ════════════════════════════════════════════
+   EXPERIMENT 2 · E = MC²
+════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById('c2'), ctx=cv.getContext('2d');
+  const massSlider=document.getElementById('mass');
+  const massVal=document.getElementById('massVal');
+  const btn=document.getElementById('annihilateBtn');
+  /* FIX: track animId to cancel previous RAF chains */
+  let particles=[], exploding=false, animId=null;
+
+  massSlider.oninput=()=>{ massVal.textContent=parseFloat(massSlider.value).toFixed(1); draw(); };
+
+  function draw(){
+    ctx.fillStyle='#050508'; ctx.fillRect(0,0,cv.width,cv.height);
+    const m=parseFloat(massSlider.value)/1000;
+    const E=m*9e16;
+    const cx=200,cy=150;
+
+    if(!exploding){
+      const r=8+parseFloat(massSlider.value)*0.3;
+      const grd=ctx.createRadialGradient(cx-r/3,cy-r/3,2,cx,cy,r);
+      grd.addColorStop(0,'#c9a84c'); grd.addColorStop(1,'#5a3010');
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.fillStyle=grd; ctx.fill();
+      ctx.shadowBlur=20; ctx.shadowColor='#c9a84c'; ctx.fill(); ctx.shadowBlur=0;
+    }
+
+    // Energy bar
+    const maxE=9e13; const pct=Math.min(E/maxE,1);
+    ctx.fillStyle='rgba(201,168,76,0.1)'; ctx.fillRect(40,240,320,16);
+    const barGrd=ctx.createLinearGradient(40,0,360,0);
+    barGrd.addColorStop(0,'#b84c22'); barGrd.addColorStop(1,'#c9a84c');
+    ctx.fillStyle=barGrd; ctx.fillRect(40,240,320*pct,16);
+    ctx.fillStyle='rgba(245,240,232,0.5)'; ctx.font='10px Space Mono,monospace';
+    ctx.fillText(`E = ${(E/1e12).toFixed(1)} TJ`, 40, 230);
+
+    particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; p.life-=2;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${p.col},${p.life/100})`; ctx.fill(); });
+    particles=particles.filter(p=>p.life>0);
+  }
+
+  btn.addEventListener('click',()=>{
+    /* FIX: cancel any existing animation before starting fresh */
+    if(animId) cancelAnimationFrame(animId);
+    exploding=true;
+    const n=Math.round(parseFloat(massSlider.value)*3)+30;
+    for(let i=0;i<n;i++){
+      const a=Math.random()*Math.PI*2, spd=1+Math.random()*5;
+      particles.push({x:200,y:150,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,r:1+Math.random()*3,life:100,col:`${200+Math.floor(Math.random()*55)},${Math.floor(Math.random()*100)},20`});
+    }
+    setTimeout(()=>{ exploding=false; draw(); },600);
+    (function animEx(){ draw(); animId = particles.length ? requestAnimationFrame(animEx) : null; })();
+  });
+  draw();
+})();
+
+/* ════════════════════════════════════════════
+   EXPERIMENT 3 · TWIN PARADOX
+════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById('c3'), ctx=cv.getContext('2d');
+  const spSlider=document.getElementById('speed');
+  const spVal=document.getElementById('speedVal');
+  const btn=document.getElementById('launchBtn');
+  let running=false, t=0, earthAge=0, twinAge=0;
+
+  spSlider.oninput=()=>{ spVal.textContent=spSlider.value+'%'; if(!running) draw(); };
+
+  function gamma(v){ const b=v/100; return 1/Math.sqrt(1-b*b); }
+
+  function draw(){
+    ctx.fillStyle='#050508'; ctx.fillRect(0,0,cv.width,cv.height);
+    const v=parseInt(spSlider.value);
+    const g=gamma(v);
+    /* FIX: bounce at midpoint to simulate out-and-back journey */
+    const halfPct = t<=150 ? t/150 : (300-t)/150;
+    const pct = Math.max(0, Math.min(1, halfPct));
+
+    // Stars
+    for(let i=0;i<30;i++){
+      ctx.beginPath(); ctx.arc((i*47+t*0.5*(i%3?1:-1))%400,i*10%300,0.8,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.fill();
+    }
+
+    // Earth twin (left)
+    const ey=150;
+    ctx.beginPath(); ctx.arc(60,ey,22,0,Math.PI*2);
+    const eg=ctx.createRadialGradient(52,142,4,60,150,22);
+    eg.addColorStop(0,'#4488ff'); eg.addColorStop(1,'#224488');
+    ctx.fillStyle=eg; ctx.fill();
+    ctx.fillStyle='rgba(245,240,232,0.8)'; ctx.font='bold 11px Crimson Pro,serif';
+    ctx.fillText('EARTH',38,ey+40);
+    ctx.font='10px Space Mono,monospace'; ctx.fillStyle='rgba(201,168,76,0.9)';
+    ctx.fillText(`${earthAge.toFixed(1)}y`,44,ey+55);
+
+    // Rocket twin — travels right then comes back
+    const rx=80+pct*240;
+    ctx.beginPath(); ctx.arc(rx,ey,14,0,Math.PI*2);
+    const rg=ctx.createRadialGradient(rx-4,ey-4,2,rx,ey,14);
+    rg.addColorStop(0,'#c9a84c'); rg.addColorStop(1,'#5a3010');
+    ctx.fillStyle=rg; ctx.fill();
+    ctx.shadowBlur=15; ctx.shadowColor='#c9a84c'; ctx.fill(); ctx.shadowBlur=0;
+    ctx.fillStyle='rgba(245,240,232,0.8)'; ctx.font='bold 10px Crimson Pro,serif';
+    ctx.fillText('TWIN',rx-14,ey+30);
+    ctx.font='10px Space Mono,monospace'; ctx.fillStyle='rgba(100,200,100,0.9)';
+    ctx.fillText(`${twinAge.toFixed(1)}y`,rx-12,ey+44);
+
+    // Direction indicator
+    const dir = t<=150 ? '→' : '←';
+    ctx.fillStyle='rgba(201,168,76,0.5)'; ctx.font='14px Space Mono,monospace';
+    ctx.fillText(dir, rx+18, ey+4);
+
+    // Dilation factor
+    ctx.fillStyle='rgba(201,168,76,0.4)'; ctx.font='10px Space Mono,monospace';
+    ctx.fillText(`γ = ${g.toFixed(3)}`,140,280);
+    ctx.fillText(`v = ${v}% c`,140,265);
+
+    // Age diff bar
+    if(earthAge>0){
+      const diff=earthAge-twinAge;
+      ctx.fillStyle='rgba(245,240,232,0.15)'; ctx.fillRect(40,20,320,18);
+      ctx.fillStyle='rgba(184,76,34,0.7)'; ctx.fillRect(40,20,Math.min(diff/earthAge*320,320),18);
+      ctx.fillStyle='rgba(245,240,232,0.5)'; ctx.font='9px Space Mono,monospace';
+      ctx.fillText(`Age gap: ${diff.toFixed(2)} years`,44,32);
+    }
+  }
+
+  btn.addEventListener('click',()=>{
+    if(running){ running=false; btn.textContent='Launch Twin'; t=0; earthAge=0; twinAge=0; draw(); return; }
+    running=true; btn.textContent='Stop'; t=0; earthAge=0; twinAge=0;
+    const v=parseInt(spSlider.value), g=gamma(v);
+    (function loop(){
+      if(!running) return;
+      t+=1; earthAge+=0.05; twinAge+=0.05/g;
+      if(t>300){ running=false; btn.textContent='Launch Twin'; }
+      draw(); requestAnimationFrame(loop);
+    })();
+  });
+  draw();
+})();
+
+/* ════════════════════════════════════════════
+   EXPERIMENT 4 · GRAVITATIONAL LENSING
+════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById('c4'), ctx=cv.getContext('2d');
+  const mSlider=document.getElementById('lmass');
+  const mVal=document.getElementById('lmassVal');
+  const ySlider=document.getElementById('lypos');
+  const yVal=document.getElementById('lyposVal');
+
+  mSlider.oninput=()=>{ mVal.textContent=mSlider.value; draw(); };
+  ySlider.oninput=()=>{ yVal.textContent=ySlider.value; draw(); };
+
+  function draw(){
+    ctx.fillStyle='#050508'; ctx.fillRect(0,0,cv.width,cv.height);
+    const M=parseInt(mSlider.value), ly=parseInt(ySlider.value);
+    const cx=200, cy=150;
+
+    // Background stars
+    for(let i=0;i<40;i++){
+      ctx.beginPath(); ctx.arc(i*10%400,(i*17+7)%300,0.7,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.fill();
+    }
+
+    // Gravity well glow
+    for(let r=M*1.5;r>0;r-=5){
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(201,168,76,${0.003*M/r})`; ctx.fill();
+    }
+
+    // Massive object
+    const objR=8+M*0.2;
+    const og=ctx.createRadialGradient(cx-objR*.3,cy-objR*.3,2,cx,cy,objR);
+    og.addColorStop(0,'#ffffff'); og.addColorStop(0.4,'#c9a84c'); og.addColorStop(1,'#3a2000');
+    ctx.beginPath(); ctx.arc(cx,cy,objR,0,Math.PI*2);
+    ctx.fillStyle=og; ctx.fill();
+    ctx.shadowBlur=30; ctx.shadowColor='#c9a84c'; ctx.fill(); ctx.shadowBlur=0;
+
+    // Light ray with clamped deflection to prevent NaN/overflow artifacts
+    ctx.strokeStyle='rgba(255,220,80,0.8)'; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    for(let x=0;x<=cv.width;x+=2){
+      const dx=x-cx, dy=ly-cy;
+      const dist=Math.sqrt(dx*dx+dy*dy)||1;
+      const bend=M*1200/(dist*dist*dist);
+      /* FIX: clamp deflY to canvas bounds to prevent infinite spike */
+      const rawDeflY=ly+bend*dy*(x-cx)/dist/10;
+      const deflY=Math.max(0, Math.min(cv.height, rawDeflY));
+      if(x===0) ctx.moveTo(x,deflY); else ctx.lineTo(x,deflY);
+    }
+    ctx.stroke();
+
+    // Undisturbed dotted line
+    ctx.setLineDash([4,6]); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,ly); ctx.lineTo(cv.width,ly); ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle='rgba(245,240,232,0.4)'; ctx.font='9px Space Mono,monospace';
+    ctx.fillText('— deflected', 10, ly-6);
+    ctx.fillText('· · straight', 10, ly+14);
+  }
+  draw();
+})();
+
+/* ════════════════════════════════════════════
+   EXPERIMENT 5 · BROWNIAN MOTION
+════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById('c5'), ctx=cv.getContext('2d');
+  const tSlider=document.getElementById('temp');
+  const tVal=document.getElementById('tempVal');
+  const pSlider=document.getElementById('parts');
+  const pVal=document.getElementById('partsVal');
+  let molecules=[], pollen={x:200,y:150,vx:0,vy:0}, trail=[], animId;
+
+  function init(){
+    const n=parseInt(pSlider.value);
+    molecules=[];
+    for(let i=0;i<n;i++) molecules.push({ x:Math.random()*400,y:Math.random()*300, vx:(Math.random()-.5)*3, vy:(Math.random()-.5)*3 });
+    pollen={x:200,y:150,vx:0,vy:0}; trail=[];
+  }
+
+  tSlider.oninput=()=>{ tVal.textContent=parseFloat(tSlider.value).toFixed(1); };
+  pSlider.oninput=()=>{ pVal.textContent=pSlider.value; init(); };
+
+  function loop(){
+    ctx.fillStyle='rgba(5,5,8,0.25)'; ctx.fillRect(0,0,cv.width,cv.height);
+    const T=parseFloat(tSlider.value);
+
+    molecules.forEach(m=>{
+      m.x+=m.vx*T*0.3; m.y+=m.vy*T*0.3;
+      if(m.x<0||m.x>cv.width) m.vx*=-1;
+      if(m.y<0||m.y>cv.height) m.vy*=-1;
+      const dx=m.x-pollen.x, dy=m.y-pollen.y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<18){ pollen.vx+=dx/d*T*0.15; pollen.vy+=dy/d*T*0.15; }
+      ctx.beginPath(); ctx.arc(m.x,m.y,2,0,Math.PI*2);
+      ctx.fillStyle=`rgba(100,160,255,0.6)`; ctx.fill();
+    });
+
+    pollen.x+=pollen.vx; pollen.y+=pollen.vy;
+    pollen.vx*=0.96; pollen.vy*=0.96;
+
+    /* FIX: cap pollen speed to prevent runaway velocity at high temperature */
+    const maxSpd=T*2;
+    const spd=Math.sqrt(pollen.vx*pollen.vx+pollen.vy*pollen.vy);
+    if(spd>maxSpd){ pollen.vx*=maxSpd/spd; pollen.vy*=maxSpd/spd; }
+
+    pollen.x=Math.max(8,Math.min(cv.width-8,pollen.x));
+    pollen.y=Math.max(8,Math.min(cv.height-8,pollen.y));
+
+    trail.push({x:pollen.x,y:pollen.y});
+    if(trail.length>120) trail.shift();
+    ctx.beginPath();
+    trail.forEach((p,i)=>{ if(i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y); });
+    ctx.strokeStyle='rgba(201,168,76,0.4)'; ctx.lineWidth=1; ctx.stroke();
+
+    const pg=ctx.createRadialGradient(pollen.x-3,pollen.y-3,2,pollen.x,pollen.y,10);
+    pg.addColorStop(0,'#f5f0e8'); pg.addColorStop(1,'#c9a84c');
+    ctx.beginPath(); ctx.arc(pollen.x,pollen.y,10,0,Math.PI*2);
+    ctx.fillStyle=pg; ctx.fill();
+    ctx.shadowBlur=12; ctx.shadowColor='#c9a84c'; ctx.fill(); ctx.shadowBlur=0;
+
+    ctx.fillStyle='rgba(245,240,232,0.4)'; ctx.font='9px Space Mono,monospace';
+    ctx.fillText('● pollen grain',10,285); ctx.fillStyle='rgba(100,160,255,0.6)'; ctx.fillText('● H₂O molecules',120,285);
+    animId=requestAnimationFrame(loop);
+  }
+  init(); loop();
+})();
+
+/* ════════════════════════════════════════════
+   EXPERIMENT 6 · SPACETIME FABRIC
+   FIX: pause RAF when section is off-screen
+════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById('c6'), ctx=cv.getContext('2d');
+  const mSlider=document.getElementById('smass');
+  const mVal=document.getElementById('smassVal');
+  let angle=0, visible=false, rafId=null;
+
+  mSlider.oninput=()=>{ mVal.textContent=mSlider.value; };
+
+  /* FIX: only run RAF when section is visible */
+  new IntersectionObserver(([entry])=>{
+    visible=entry.isIntersecting;
+    if(visible && !rafId) loop();
+  },{threshold:0.1}).observe(cv);
+
+  function warp(x,y,cx,cy,M){
+    const dx=x-cx, dy=y-cy, d=Math.sqrt(dx*dx+dy*dy)||0.01;
+    const pull=M*80/(d*d+M*10);
+    return { x:x+dx*pull/d*(-1), y:y+dy*pull/d*(-1) };
+  }
+
+  function loop(){
+    if(!visible){ rafId=null; return; }
+    ctx.fillStyle='#050508'; ctx.fillRect(0,0,cv.width,cv.height);
+    const M=parseInt(mSlider.value);
+    const cx=200,cy=150;
+    angle+=0.005;
+
+    ctx.lineWidth=0.8;
+    for(let gx=-2;gx<=22;gx++){
+      ctx.beginPath();
+      for(let gy=0;gy<=20;gy++){
+        const wx=gx*20, wy=gy*16;
+        const w=warp(wx,wy,cx,cy,M);
+        const alpha=0.15+M*0.003;
+        ctx.strokeStyle=`rgba(201,168,76,${Math.min(alpha,0.5)})`;
+        if(gy===0) ctx.moveTo(w.x,w.y); else ctx.lineTo(w.x,w.y);
+      }
+      ctx.stroke();
+    }
+    for(let gy=0;gy<=20;gy++){
+      ctx.beginPath();
+      for(let gx=-2;gx<=22;gx++){
+        const wx=gx*20, wy=gy*16;
+        const w=warp(wx,wy,cx,cy,M);
+        if(gx===-2) ctx.moveTo(w.x,w.y); else ctx.lineTo(w.x,w.y);
+      }
+      ctx.stroke();
+    }
+
+    // Central mass
+    const or=6+M*0.4;
+    for(let r=or*3;r>or;r-=4){
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(201,168,76,${0.01*(or*3-r)/(or*2)})`; ctx.fill();
+    }
+    const sg=ctx.createRadialGradient(cx-or*.4,cy-or*.4,1,cx,cy,or);
+    sg.addColorStop(0,'#fffde8'); sg.addColorStop(0.5,'#c9a84c'); sg.addColorStop(1,'#3a2000');
+    ctx.beginPath(); ctx.arc(cx,cy,or,0,Math.PI*2); ctx.fillStyle=sg; ctx.fill();
+    ctx.shadowBlur=20; ctx.shadowColor='#c9a84c'; ctx.fill(); ctx.shadowBlur=0;
+
+    // Orbiting dot
+    if(M>10){
+      const OR=40+M*0.6;
+      const ox=cx+Math.cos(angle)*OR, oy=cy+Math.sin(angle)*OR*0.4;
+      ctx.beginPath(); ctx.arc(ox,oy,4,0,Math.PI*2);
+      ctx.fillStyle='rgba(100,200,255,0.9)'; ctx.fill();
+      ctx.shadowBlur=8; ctx.shadowColor='#64c8ff'; ctx.fill(); ctx.shadowBlur=0;
+    }
+
+    ctx.fillStyle='rgba(245,240,232,0.35)'; ctx.font='9px Space Mono,monospace';
+    ctx.fillText(`Mass = ${M}  Curvature ∝ M`,10,285);
+
+    rafId=requestAnimationFrame(loop);
+  }
+  loop();
+})();
+</script>
+
+<!-- ═══ MONETIZATION ═══ -->
+<style>
+#money-bar{position:fixed;bottom:0;left:0;right:0;z-index:8999;
+  background:rgba(8,10,20,0.97);backdrop-filter:blur(12px);
+  border-top:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.5rem 1.5rem;gap:1rem;flex-wrap:wrap;
+  font-family:'Inter',system-ui,sans-serif;}
+#money-bar .mbar-left{font-size:0.72rem;color:rgba(255,255,255,0.4);}
+#money-bar .mbar-left span{color:rgba(255,255,255,0.75);font-weight:500;}
+#money-bar .mbar-right{display:flex;align-items:center;gap:0.75rem;}
+.kofi-btn{display:inline-flex;align-items:center;gap:0.4rem;
+  background:#FF5E5B;color:#fff;text-decoration:none;
+  padding:0.4rem 1rem;border-radius:6px;font-size:0.75rem;font-weight:600;
+  transition:opacity 0.2s;white-space:nowrap;}
+.kofi-btn:hover{opacity:0.85;}
+.close-bar{background:none;border:none;color:rgba(255,255,255,0.3);
+  cursor:pointer;font-size:1rem;padding:0.2rem 0.5rem;transition:color 0.2s;}
+.close-bar:hover{color:#fff;}
+/* Give page bottom breathing room so bar doesn't cover content */
+body{padding-bottom:56px;}
+/* AdSense slot */
+#adsense-slot{min-width:200px;text-align:center;}
+@media(max-width:600px){#adsense-slot{display:none;}
+  #money-bar{padding:0.4rem 0.8rem;}}
+</style>
+
+<div id="money-bar">
+  <div class="mbar-left">Made with ❤️ &nbsp;·&nbsp; <span>Free science for everyone</span></div>
+  <div class="mbar-right">
+    <!-- AdSense Ad Unit — replace data-ad-slot with your real slot ID -->
+    <div id="adsense-slot">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:320px;height:50px"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    <!-- Ko-fi donate button -->
+    <a class="kofi-btn" href="https://ko-fi.com/yourname" target="_blank" rel="noopener">
+      ☕ Support on Ko-fi
+    </a>
+    <button class="close-bar" onclick="document.getElementById('money-bar').style.display='none'" title="Close">✕</button>
+  </div>
+</div>
+
+<!-- AdSense library — replace with your real publisher ID -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</body>
+</html>

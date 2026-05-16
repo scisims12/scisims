@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive photoelectric effect simulation. Adjust frequency and intensity of light and watch electrons eject from a metal surface in real time.">
+  <meta name="keywords" content="photoelectric effect, photons, electrons, quantum physics simulation, Einstein Nobel Prize">
+  <meta property="og:title" content="Photoelectric Effect">
+  <meta property="og:description" content="Interactive photoelectric effect simulation. Adjust frequency and intensity of light and watch electrons eject from a metal surface in real time.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+<title>Photoelectric Effect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080c14;
+    --bg2: #0e1520;
+    --bg3: #141d2e;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(255,255,255,0.14);
+    --text: #e8eef6;
+    --text-dim: #6b7a94;
+    --text-mid: #9aaabf;
+    --accent: #38bdf8;
+    --accent-glow: rgba(56,189,248,0.25);
+    --green: #34d399;
+    --green-bg: rgba(52,211,153,0.08);
+    --red: #f87171;
+    --red-bg: rgba(248,113,113,0.08);
+    --gold: #fbbf24;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem 3rem;
+  }
+
+  .wrapper {
+    width: 100%;
+    max-width: 780px;
+  }
+
+  /* ── Header ── */
+  header {
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+  .title-block { flex: 1; }
+  h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(1.3rem, 3vw, 1.75rem);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #e8eef6 0%, #38bdf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+  .subtitle {
+    margin-top: 5px;
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    border: 1px solid var(--border-bright);
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* ── Canvas ── */
+  .canvas-wrap {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border-bright);
+    background: #030609;
+    box-shadow: 0 0 60px rgba(56,189,248,0.06), 0 20px 60px rgba(0,0,0,0.5);
+    margin-bottom: 1.25rem;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .canvas-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent 80%, #030609 100%);
+  }
+
+  /* ── Controls ── */
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 1.25rem;
+  }
+  .ctrl-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    transition: border-color 0.3s;
+  }
+  .ctrl-card:hover { border-color: var(--border-bright); }
+  .ctrl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+  .ctrl-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .ctrl-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .ctrl-unit {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-dim);
+    margin-left: 3px;
+  }
+
+  /* Custom slider */
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 99px;
+    outline: none;
+    cursor: pointer;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+    transition: background 0.3s;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow), 0 2px 6px rgba(0,0,0,0.4);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 5px var(--accent-glow), 0 2px 8px rgba(0,0,0,0.5);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    cursor: pointer;
+  }
+
+  #freq-slider { background: linear-gradient(to right, #8B2BE2, #3333ff, #00cc44, #ffcc00, #ff4400, #aaa); }
+
+  .color-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px 3px 6px;
+    border-radius: 99px;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.3s;
+  }
+  .color-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  .int-dots {
+    display: flex;
+    gap: 5px;
+    margin-top: 4px;
+  }
+  .int-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    transition: background 0.25s, box-shadow 0.25s;
+  }
+  .int-dot.on {
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent-glow);
+  }
+
+  /* ── Stats ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .stat {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.9rem 1rem;
+    text-align: center;
+    transition: border-color 0.3s, transform 0.2s;
+  }
+  .stat:hover { transform: translateY(-2px); border-color: var(--border-bright); }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .stat-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 17px;
+    font-weight: 700;
+    transition: color 0.3s;
+  }
+
+  /* ── Insight ── */
+  .insight {
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    font-size: 14px;
+    line-height: 1.7;
+    border: 1px solid;
+    transition: all 0.4s ease;
+    margin-bottom: 1.25rem;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .insight.ejecting {
+    background: var(--green-bg);
+    border-color: rgba(52,211,153,0.25);
+    color: #a7f3d0;
+  }
+  .insight.blocked {
+    background: var(--red-bg);
+    border-color: rgba(248,113,113,0.25);
+    color: #fecaca;
+  }
+  .insight-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .insight strong { font-weight: 600; }
+  .insight em { font-style: normal; text-decoration: underline; text-decoration-color: rgba(255,255,255,0.3); }
+
+  /* ── Buttons ── */
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  button {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--bg2);
+    border: 1px solid var(--border-bright);
+    color: var(--text-mid);
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  button:hover {
+    background: var(--bg3);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(56,189,248,0.12);
+  }
+  button .icon { opacity: 0.6; font-size: 11px; }
+
+  /* ── Threshold indicator ── */
+  .threshold-bar {
+    margin-bottom: 10px;
+    position: relative;
+    height: 3px;
+    background: var(--bg3);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .threshold-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.1s, background 0.3s;
+  }
+  .threshold-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+  .live-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse-dot 1.4s ease-in-out infinite;
+    margin-right: 5px;
+  }
+  .live-dot.inactive { background: var(--red); }
+
+  @media (max-width: 500px) {
+    .controls { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stats .stat:last-child { grid-column: span 2; }
+    header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<style>
+#sci-nav{position:sticky;top:0;z-index:9000;background:rgba(8,10,20,0.97);
+  backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,0.07);
+  padding:0.55rem 1.5rem;display:flex;align-items:center;gap:0.5rem;
+  flex-wrap:wrap;font-family:'Inter',system-ui,sans-serif;font-size:0.72rem;
+  letter-spacing:0.04em;}
+#sci-nav a{color:rgba(255,255,255,0.5);text-decoration:none;padding:0.3rem 0.7rem;
+  border-radius:4px;transition:all 0.2s;white-space:nowrap;}
+#sci-nav a:hover{color:#fff;background:rgba(255,255,255,0.07);}
+#sci-nav a.active{color:#f0854a;border-bottom:1px solid #f0854a;}
+#sci-nav .nav-brand{font-weight:700;color:#fff;margin-right:0.5rem;font-size:0.78rem;}
+@media(max-width:600px){#sci-nav{padding:0.4rem 0.8rem;gap:0.3rem;font-size:0.65rem;}}
+</style>
+<nav id="sci-nav">
+  <span class="nav-brand">⚛ SciSims</span>
+  <a href="einstein_experiments.html">Einstein's Universe</a>
+  <a href="double_slit_experiment.html">Double Slit</a>
+  <a href="photoelectric_effect_simulation.html" class="active">Photoelectric Effect</a>
+  <a href="rutherford_gold_foil_experiment.html">Rutherford</a>
+  <a href="india_rainfall_report_25years.html">India Rainfall</a>
+  <a href="india_rainfall_report_2026_prediction.html">2026 Forecast</a>
+</nav>
+
+<div class="wrapper">
+
+  <header>
+    <div class="title-block">
+      <h1>Photoelectric Effect</h1>
+      <p class="subtitle">Quantum mechanics — one photon, one electron</p>
+    </div>
+    <span class="badge">Interactive Sim</span>
+  </header>
+
+  <!-- Canvas -->
+  <div class="canvas-wrap">
+    <canvas id="sim"></canvas>
+    <div class="canvas-overlay"></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="ctrl-card">
+      <div class="ctrl-header">
+        <span class="ctrl-label">Light Frequency</span>
+        <span class="ctrl-val"><span id="freq-val">600</span><span class="ctrl-unit">THz</span></span>
+      </div>
+      <input type="range" min="400" max="900" value="600" id="freq-slider" step="1">
+      <div class="threshold-bar">
+        <div class="threshold-fill" id="freq-fill"></div>
+      </div>
+      <div class="threshold-label">
+        <span>400</span><span>Threshold: 545 THz</span><span>900</span>
+      </div>
+      <div id="color-pill" class="color-pill" style="margin-top:8px;">
+        <div class="color-dot" id="color-dot"></div>
+        <span id="color-name"></span>
+      </div>
+    </div>
+
+    <div class="ctrl-card">
+      <div class="ctrl-header">
+        <span class="ctrl-label">Intensity (Photons/s)</span>
+        <span class="ctrl-val"><span id="int-val">5</span><span class="ctrl-unit">×</span></span>
+      </div>
+      <input type="range" min="1" max="10" value="5" id="int-slider" step="1">
+      <div class="int-dots" id="int-dots"></div>
+      <div style="margin-top:10px;font-size:12px;color:var(--text-dim);line-height:1.6;">
+        More photons hit the surface — but each carries the same energy.
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Photon Energy</div>
+      <div class="stat-value" id="photon-energy" style="color:var(--accent)">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label"><span class="live-dot inactive" id="live-dot"></span>Electrons Out</div>
+      <div class="stat-value" id="electrons-out" style="color:var(--green)">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Electron KE</div>
+      <div class="stat-value" id="electron-speed" style="color:var(--gold)">—</div>
+    </div>
+  </div>
+
+  <!-- Insight -->
+  <div class="insight blocked" id="insight-box">
+    <span class="insight-icon" id="insight-icon">🔴</span>
+    <span id="insight-text"></span>
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-row">
+    <button onclick="sendPrompt('Why does frequency matter but not brightness for the photoelectric effect?')">
+      Why frequency over brightness? <span class="icon">↗</span>
+    </button>
+    <button onclick="sendPrompt('What is the threshold frequency in the photoelectric effect?')">
+      Threshold frequency <span class="icon">↗</span>
+    </button>
+    <button onclick="sendPrompt('How did Einstein explain the photoelectric effect?')">
+      Einstein's explanation <span class="icon">↗</span>
+    </button>
+  </div>
+
+</div>
+
+<script>
+// ─── Canvas setup ───────────────────────────────────────────────
+const canvas = document.getElementById('sim');
+const ctx = canvas.getContext('2d');
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width || 780;
+  canvas.height = Math.round(canvas.width * 0.42);
+}
+resizeCanvas();
+window.addEventListener('resize', () => { resizeCanvas(); });
+
+const THRESHOLD_FREQ = 545;
+let photons = [], electrons = [], ejectedCount = 0;
+
+// ─── Color helpers ───────────────────────────────────────────────
+function freqToColor(f) {
+  if (f < 450) return { hex: '#9333ea', name: 'Violet (UV edge)' };
+  if (f < 500) return { hex: '#3b82f6', name: 'Blue' };
+  if (f < 570) return { hex: '#22c55e', name: 'Green' };
+  if (f < 620) return { hex: '#eab308', name: 'Yellow / Orange' };
+  if (f < 750) return { hex: '#ef4444', name: 'Red' };
+  return { hex: '#94a3b8', name: 'Infrared (invisible)' };
+}
+
+// ─── State ──────────────────────────────────────────────────────
+function getFreq() { return parseInt(document.getElementById('freq-slider').value); }
+function getInt()  { return parseInt(document.getElementById('int-slider').value); }
+
+// ─── Particle helpers ────────────────────────────────────────────
+function spawnPhoton() {
+  const freq = getFreq(), intensity = getInt();
+  const { hex } = freqToColor(freq);
+  const rate = 0.08 + intensity * 0.06;
+  if (Math.random() < rate) {
+    const cw = canvas.width;
+    photons.push({
+      x: Math.random() * cw * 0.55 + cw * 0.02,
+      y: 0,
+      vx: 0.4 + Math.random() * 0.4,
+      vy: 2.8 + Math.random() * 1.5,
+      color: hex,
+      freq,
+      trail: []
+    });
+  }
+}
+
+function metalY() { return Math.round(canvas.height * 0.685); }
+
+function spawnElectron(x) {
+  const freq = getFreq();
+  const excess = Math.max(0, freq - THRESHOLD_FREQ);
+  const spd = 2.2 + excess * 0.013;
+  electrons.push({
+    x,
+    y: metalY(),
+    vx: (Math.random() - 0.5) * spd * 1.6,
+    vy: -(spd * 0.9 + Math.random() * 0.8),
+    life: 1.0,
+    decay: 0.012 + Math.random() * 0.006
+  });
+  ejectedCount++;
+  document.getElementById('electrons-out').textContent = ejectedCount;
+}
+
+// ─── Draw helpers ────────────────────────────────────────────────
+function drawBackground() {
+  const cw = canvas.width, ch = canvas.height;
+  ctx.fillStyle = '#030609';
+  ctx.fillRect(0, 0, cw, ch);
+
+  // subtle grid
+  ctx.strokeStyle = 'rgba(56,189,248,0.04)';
+  ctx.lineWidth = 0.5;
+  const gs = 36;
+  for (let x = 0; x < cw; x += gs) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ch); ctx.stroke();
+  }
+  for (let y = 0; y < ch; y += gs) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cw, y); ctx.stroke();
+  }
+}
+
+function drawMetal() {
+  const cw = canvas.width, ch = canvas.height;
+  const my = metalY();
+
+  // Metal body gradient
+  const grad = ctx.createLinearGradient(0, my, 0, ch);
+  grad.addColorStop(0, '#1c2d45');
+  grad.addColorStop(0.15, '#162236');
+  grad.addColorStop(1, '#0b1521');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, my, cw, ch - my);
+
+  // Top sheen edge
+  ctx.fillStyle = '#2a4a6e';
+  ctx.fillRect(0, my, cw, 2);
+
+  // Lattice atoms
+  const radius = 5, spacing = 26;
+  for (let x = spacing / 2; x < cw; x += spacing) {
+    const gAtom = ctx.createRadialGradient(x, my + 10, 1, x, my + 10, radius + 2);
+    gAtom.addColorStop(0, '#4a7fa8');
+    gAtom.addColorStop(1, '#1e3d5c');
+    ctx.beginPath();
+    ctx.arc(x, my + 10, radius, 0, Math.PI * 2);
+    ctx.fillStyle = gAtom;
+    ctx.fill();
+  }
+
+  // Label
+  ctx.font = `500 11px 'DM Sans', sans-serif`;
+  ctx.fillStyle = 'rgba(148,163,184,0.5)';
+  ctx.fillText('Zn metal surface', 10, my + 32);
+}
+
+function drawPhoton(p) {
+  // Trail
+  if (p.trail.length > 1) {
+    for (let i = 1; i < p.trail.length; i++) {
+      const alpha = (i / p.trail.length) * 0.25;
+      ctx.beginPath();
+      ctx.moveTo(p.trail[i-1].x, p.trail[i-1].y);
+      ctx.lineTo(p.trail[i].x, p.trail[i].y);
+      ctx.strokeStyle = p.color + Math.round(alpha * 255).toString(16).padStart(2, '0');
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
+  // Glow
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+  ctx.fillStyle = p.color + '18';
+  ctx.fill();
+  // Core
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+  ctx.fillStyle = p.color;
+  ctx.shadowColor = p.color;
+  ctx.shadowBlur = 12;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
+function drawElectron(e) {
+  const alpha = e.life;
+  ctx.beginPath();
+  ctx.arc(e.x, e.y, 3.5, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(56,189,248,${alpha * 0.9})`;
+  ctx.shadowColor = '#38bdf8';
+  ctx.shadowBlur = 14 * alpha;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  // Tiny ring
+  ctx.beginPath();
+  ctx.arc(e.x, e.y, 6, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(56,189,248,${alpha * 0.25})`;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+function drawLabels(ejecting) {
+  const cw = canvas.width;
+  ctx.font = `400 11px 'Space Mono', monospace`;
+  ctx.fillStyle = 'rgba(148,163,184,0.55)';
+  ctx.fillText('photons ↓', 10, 18);
+  if (ejecting) {
+    ctx.fillStyle = 'rgba(56,189,248,0.6)';
+    ctx.fillText('e⁻ ejected →', cw * 0.55, 60);
+  }
+  // Threshold line
+  ctx.beginPath();
+  ctx.setLineDash([4, 6]);
+  ctx.moveTo(0, metalY() - 2);
+  ctx.lineTo(cw, metalY() - 2);
+  ctx.strokeStyle = 'rgba(251,191,36,0.12)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// ─── Animation loop ──────────────────────────────────────────────
+function animate() {
+  const freq = getFreq();
+  const ejecting = freq >= THRESHOLD_FREQ;
+  const my = metalY();
+
+  drawBackground();
+  drawMetal();
+  drawLabels(ejecting);
+
+  spawnPhoton();
+
+  photons = photons.filter(p => {
+    p.trail.push({ x: p.x, y: p.y });
+    if (p.trail.length > 10) p.trail.shift();
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.y >= my) {
+      if (ejecting) spawnElectron(p.x + Math.random() * 30 - 15);
+      return false;
+    }
+    drawPhoton(p);
+    return true;
+  });
+
+  electrons = electrons.filter(e => {
+    e.x += e.vx;
+    e.y += e.vy;
+    e.vy += 0.04;
+    e.life -= e.decay;
+    if (e.life <= 0 || e.y > canvas.height + 20) return false;
+    drawElectron(e);
+    return true;
+  });
+
+  requestAnimationFrame(animate);
+}
+
+// ─── UI update ───────────────────────────────────────────────────
+function buildIntDots(n) {
+  const container = document.getElementById('int-dots');
+  container.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const d = document.createElement('div');
+    d.className = 'int-dot' + (i < n ? ' on' : '');
+    container.appendChild(d);
+  }
+}
+
+function update() {
+  const freq = getFreq();
+  const intensity = getInt();
+  const ejecting = freq >= THRESHOLD_FREQ;
+  const excess = Math.max(0, freq - THRESHOLD_FREQ);
+  const photonEnergy = (freq * 0.00414).toFixed(2);
+  const ke = ejecting ? (excess * 0.00414).toFixed(2) : '0.00';
+  const { hex, name } = freqToColor(freq);
+
+  // Sliders
+  document.getElementById('freq-val').textContent = freq;
+  document.getElementById('int-val').textContent = intensity;
+
+  // Freq fill bar
+  const pct = ((freq - 400) / 500) * 100;
+  const fill = document.getElementById('freq-fill');
+  fill.style.width = pct + '%';
+  fill.style.background = ejecting
+    ? `linear-gradient(to right, #9333ea, ${hex})`
+    : `linear-gradient(to right, #9333ea, ${hex})`;
+
+  // Color pill
+  document.getElementById('color-dot').style.background = hex;
+  document.getElementById('color-dot').style.boxShadow = `0 0 6px ${hex}`;
+  document.getElementById('color-name').textContent = name;
+  document.getElementById('color-name').style.color = hex;
+
+  // Intensity dots
+  buildIntDots(intensity);
+
+  // Stats
+  document.getElementById('photon-energy').textContent = photonEnergy + ' eV';
+  document.getElementById('electron-speed').textContent = ejecting ? ke + ' eV' : '0 eV';
+
+  // Live dot
+  const dot = document.getElementById('live-dot');
+  dot.className = 'live-dot' + (ejecting ? '' : ' inactive');
+
+  // Insight
+  const box = document.getElementById('insight-box');
+  const icon = document.getElementById('insight-icon');
+  const text = document.getElementById('insight-text');
+  if (ejecting) {
+    box.className = 'insight ejecting';
+    icon.textContent = '⚡';
+    text.innerHTML = `<strong>Electrons are being ejected!</strong> ${name} light at ${freq} THz exceeds the threshold of ${THRESHOLD_FREQ} THz. Each photon carries ${photonEnergy} eV — enough to knock electrons free with ${ke} eV of kinetic energy. Notice: increasing brightness sends <em>more</em> electrons, but not faster — only higher frequency does that.`;
+  } else {
+    box.className = 'insight blocked';
+    icon.textContent = '🚫';
+    text.innerHTML = `<strong>No electrons ejected.</strong> ${name} light at ${freq} THz is below the ${THRESHOLD_FREQ} THz threshold. Even at maximum brightness, no electron escapes — because each photon carries only ${photonEnergy} eV, short of the work function. This is the quantum mystery Einstein solved!`;
+  }
+}
+
+document.getElementById('freq-slider').addEventListener('input', update);
+document.getElementById('int-slider').addEventListener('input', update);
+
+animate();
+update();
+</script>
+
+<!-- ═══ MONETIZATION ═══ -->
+<style>
+#money-bar{position:fixed;bottom:0;left:0;right:0;z-index:8999;
+  background:rgba(8,10,20,0.97);backdrop-filter:blur(12px);
+  border-top:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.5rem 1.5rem;gap:1rem;flex-wrap:wrap;
+  font-family:'Inter',system-ui,sans-serif;}
+#money-bar .mbar-left{font-size:0.72rem;color:rgba(255,255,255,0.4);}
+#money-bar .mbar-left span{color:rgba(255,255,255,0.75);font-weight:500;}
+#money-bar .mbar-right{display:flex;align-items:center;gap:0.75rem;}
+.kofi-btn{display:inline-flex;align-items:center;gap:0.4rem;
+  background:#FF5E5B;color:#fff;text-decoration:none;
+  padding:0.4rem 1rem;border-radius:6px;font-size:0.75rem;font-weight:600;
+  transition:opacity 0.2s;white-space:nowrap;}
+.kofi-btn:hover{opacity:0.85;}
+.close-bar{background:none;border:none;color:rgba(255,255,255,0.3);
+  cursor:pointer;font-size:1rem;padding:0.2rem 0.5rem;transition:color 0.2s;}
+.close-bar:hover{color:#fff;}
+/* Give page bottom breathing room so bar doesn't cover content */
+body{padding-bottom:56px;}
+/* AdSense slot */
+#adsense-slot{min-width:200px;text-align:center;}
+@media(max-width:600px){#adsense-slot{display:none;}
+  #money-bar{padding:0.4rem 0.8rem;}}
+</style>
+
+<div id="money-bar">
+  <div class="mbar-left">Made with ❤️ &nbsp;·&nbsp; <span>Free science for everyone</span></div>
+  <div class="mbar-right">
+    <!-- AdSense Ad Unit — replace data-ad-slot with your real slot ID -->
+    <div id="adsense-slot">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:320px;height:50px"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    <!-- Ko-fi donate button -->
+    <a class="kofi-btn" href="https://ko-fi.com/yourname" target="_blank" rel="noopener">
+      ☕ Support on Ko-fi
+    </a>
+    <button class="close-bar" onclick="document.getElementById('money-bar').style.display='none'" title="Close">✕</button>
+  </div>
+</div>
+
+<!-- AdSense library — replace with your real publisher ID -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</body>
+</html>

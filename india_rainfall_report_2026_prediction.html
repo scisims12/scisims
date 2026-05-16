@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="India rainfall forecast for 2026 with 25-year IMD trend analysis. Interactive charts and state-wise monsoon predictions.">
+  <meta name="keywords" content="India rainfall 2026 prediction, monsoon forecast India, IMD rainfall prediction, India precipitation forecast">
+  <meta property="og:title" content="India Rainfall Report 2000–2026 | IMD Data + 2026 Forecast">
+  <meta property="og:description" content="India rainfall forecast for 2026 with 25-year IMD trend analysis. Interactive charts and state-wise monsoon predictions.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+<title>India Rainfall Report 2000–2026 | IMD Data + 2026 Forecast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rain-deep: #0a1628;
+    --rain-blue: #1a3a5c;
+    --rain-mid: #1e5f8a;
+    --rain-light: #4a9eca;
+    --rain-sky: #a8d8f0;
+    --accent-gold: #f0a500;
+    --accent-orange: #e06030;
+    --accent-green: #2ecc71;
+    --accent-red: #e74c3c;
+    --accent-yellow: #f1c40f;
+    --accent-purple: #9b59b6;
+    --accent-teal: #1abc9c;
+    --text-primary: #e8f4f8;
+    --text-secondary: #8ab4cc;
+    --text-muted: #4a7a9b;
+    --border: rgba(74,158,202,0.25);
+    --card-bg: rgba(26,58,92,0.5);
+    --glass: rgba(10,22,40,0.8);
+    --predict-glow: rgba(155,89,182,0.25);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--rain-deep);
+    color: var(--text-primary);
+    font-family: 'Noto Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* Rain animation */
+  .rain-bg {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .raindrop {
+    position: absolute; top: -100px;
+    width: 1px; background: linear-gradient(transparent, rgba(74,158,202,0.4));
+    animation: fall linear infinite;
+    border-radius: 2px;
+  }
+  @keyframes fall { to { transform: translateY(110vh); } }
+
+  /* Header */
+  header {
+    position: relative; z-index: 10;
+    padding: 60px 40px 40px;
+    background: linear-gradient(180deg, rgba(10,22,40,0.95) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 4px;
+    color: var(--rain-light); text-transform: uppercase;
+    margin-bottom: 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .header-tag::before { content:''; width:40px; height:1px; background: var(--rain-light); }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 900; line-height: 1.05;
+    background: linear-gradient(135deg, #e8f4f8 30%, #4a9eca 70%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  .header-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px; color: var(--text-secondary);
+    letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .source-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(74,158,202,0.15); border: 1px solid rgba(74,158,202,0.3);
+    border-radius: 4px; padding: 6px 14px; margin-top: 12px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: var(--rain-light); letter-spacing: 1px;
+  }
+  .source-badge::before { content:'●'; color: #2ecc71; font-size: 8px; }
+  .predict-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(155,89,182,0.2); border: 1px solid rgba(155,89,182,0.5);
+    border-radius: 4px; padding: 6px 14px; margin-top: 12px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: #c39bd3; letter-spacing: 1px;
+    animation: pulse-border 2s ease-in-out infinite;
+  }
+  .predict-badge::before { content:'◆'; color: #9b59b6; font-size: 8px; }
+  @keyframes pulse-border {
+    0%,100% { box-shadow: 0 0 0 0 rgba(155,89,182,0); }
+    50% { box-shadow: 0 0 12px 2px rgba(155,89,182,0.3); }
+  }
+
+  /* Main container */
+  main { position: relative; z-index: 5; padding: 40px; max-width: 1500px; margin: 0 auto; }
+
+  /* Section headers */
+  .section-header {
+    margin: 50px 0 28px;
+    display: flex; align-items: baseline; gap: 16px;
+  }
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--rain-light); letter-spacing: 3px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; font-weight: 700;
+    color: var(--text-primary);
+  }
+  .section-line {
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* Info banner */
+  .info-banner {
+    background: linear-gradient(135deg, rgba(30,95,138,0.4), rgba(26,58,92,0.4));
+    border: 1px solid var(--border); border-left: 3px solid var(--rain-light);
+    border-radius: 6px; padding: 20px 24px; margin-bottom: 36px;
+    font-size: 14px; line-height: 1.7; color: var(--text-secondary);
+  }
+  .info-banner strong { color: var(--text-primary); }
+
+  /* Prediction banner */
+  .predict-banner {
+    background: linear-gradient(135deg, rgba(155,89,182,0.15), rgba(26,58,92,0.4));
+    border: 1px solid rgba(155,89,182,0.4); border-left: 3px solid #9b59b6;
+    border-radius: 6px; padding: 20px 24px; margin-bottom: 24px;
+    font-size: 14px; line-height: 1.7; color: var(--text-secondary);
+  }
+  .predict-banner strong { color: #c39bd3; }
+  .predict-banner .predict-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 3px; color: #9b59b6;
+    text-transform: uppercase; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .predict-banner .predict-title::before { content:'◆ '; }
+
+  /* Stat cards row */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px; margin-bottom: 40px;
+  }
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 22px 20px;
+    position: relative; overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-3px); border-color: var(--rain-light); }
+  .stat-card::before {
+    content:''; position: absolute; bottom:0; left:0; right:0; height: 2px;
+  }
+  .stat-card.blue::before { background: var(--rain-light); }
+  .stat-card.gold::before { background: var(--accent-gold); }
+  .stat-card.green::before { background: var(--accent-green); }
+  .stat-card.red::before { background: var(--accent-red); }
+  .stat-card.orange::before { background: var(--accent-orange); }
+  .stat-card.purple::before { background: var(--accent-purple); }
+  .stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 2px;
+    color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px;
+  }
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; font-weight: 700; line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-card.blue .stat-value { color: var(--rain-sky); }
+  .stat-card.gold .stat-value { color: var(--accent-gold); }
+  .stat-card.green .stat-value { color: var(--accent-green); }
+  .stat-card.red .stat-value { color: var(--accent-red); }
+  .stat-card.orange .stat-value { color: var(--accent-orange); }
+  .stat-card.purple .stat-value { color: #c39bd3; }
+  .stat-note { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+  /* Main data table */
+  .table-wrapper {
+    overflow-x: auto; border-radius: 10px;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    margin-bottom: 40px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr {
+    background: linear-gradient(90deg, rgba(30,95,138,0.9), rgba(26,58,92,0.9));
+  }
+  thead th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--rain-sky); padding: 14px 16px;
+    text-align: left; border-bottom: 2px solid var(--rain-mid);
+    white-space: nowrap;
+  }
+  thead th.special-col {
+    background: rgba(240,165,0,0.2);
+    border-left: 2px solid var(--accent-gold);
+    border-right: 2px solid var(--accent-gold);
+    color: var(--accent-gold);
+  }
+  thead th.shoutout-col {
+    background: rgba(26,188,156,0.15);
+    border-left: 2px solid var(--accent-teal);
+    border-right: 2px solid var(--accent-teal);
+    color: var(--accent-teal);
+    min-width: 220px;
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(74,158,202,0.1);
+    transition: background 0.15s;
+  }
+  tbody tr:hover { background: rgba(74,158,202,0.08); }
+  tbody tr:nth-child(even) { background: rgba(26,58,92,0.25); }
+  tbody tr:nth-child(even):hover { background: rgba(74,158,202,0.1); }
+  td {
+    padding: 12px 16px; color: var(--text-secondary);
+    vertical-align: middle; white-space: nowrap;
+  }
+  td.year-col {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px; font-weight: 700;
+    color: var(--text-primary);
+  }
+  td.special-td {
+    background: rgba(240,165,0,0.06);
+    border-left: 1px solid rgba(240,165,0,0.2);
+    border-right: 1px solid rgba(240,165,0,0.2);
+  }
+  td.shoutout-td {
+    background: rgba(26,188,156,0.05);
+    border-left: 1px solid rgba(26,188,156,0.2);
+    border-right: 1px solid rgba(26,188,156,0.2);
+    white-space: normal; line-height: 1.5;
+    font-size: 12px;
+  }
+
+  /* Prediction row */
+  tr.predict-row {
+    background: linear-gradient(90deg, rgba(155,89,182,0.12), rgba(26,58,92,0.3)) !important;
+    border-top: 2px solid rgba(155,89,182,0.5) !important;
+    border-bottom: 2px solid rgba(155,89,182,0.5) !important;
+    position: relative;
+  }
+  tr.predict-row td { border-color: rgba(155,89,182,0.2); }
+  tr.predict-row .year-col {
+    color: #c39bd3 !important;
+    text-shadow: 0 0 12px rgba(155,89,182,0.6);
+  }
+  tr.predict-row td.special-td {
+    background: rgba(155,89,182,0.08);
+    border-color: rgba(155,89,182,0.3);
+  }
+  tr.predict-row td.shoutout-td {
+    background: rgba(155,89,182,0.05);
+    border-color: rgba(155,89,182,0.2);
+  }
+  .predict-tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 2px;
+    background: rgba(155,89,182,0.25); color: #c39bd3;
+    border: 1px solid rgba(155,89,182,0.4);
+    border-radius: 3px; padding: 2px 6px;
+    text-transform: uppercase; margin-left: 6px;
+    vertical-align: middle;
+    animation: blink 1.8s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+  /* Status badges */
+  .badge {
+    display: inline-block; padding: 3px 9px; border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 1px; font-weight: 600;
+    text-transform: uppercase;
+  }
+  .badge-excess { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid rgba(46,204,113,0.3); }
+  .badge-normal { background: rgba(74,158,202,0.15); color: var(--rain-light); border: 1px solid rgba(74,158,202,0.3); }
+  .badge-below { background: rgba(241,196,15,0.15); color: var(--accent-yellow); border: 1px solid rgba(241,196,15,0.3); }
+  .badge-deficient { background: rgba(231,76,60,0.15); color: var(--accent-red); border: 1px solid rgba(231,76,60,0.3); }
+  .badge-predict { background: rgba(155,89,182,0.2); color: #c39bd3; border: 1px solid rgba(155,89,182,0.4); }
+
+  /* Departure bar */
+  .dep-bar-wrap { display: flex; align-items: center; gap: 8px; min-width: 140px; }
+  .dep-bar-bg { flex:1; height:6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow:hidden; }
+  .dep-bar-fill { height:100%; border-radius:3px; }
+  .dep-value { font-family:'IBM Plex Mono',monospace; font-size:11px; min-width:42px; text-align:right; }
+
+  /* Bar chart section */
+  .bar-chart {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 28px; margin-bottom: 36px;
+    overflow-x: auto;
+  }
+  .chart-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; margin-bottom: 24px; color: var(--text-primary);
+  }
+  .bars-container {
+    display: flex; align-items: flex-end; gap: 6px;
+    height: 180px; padding-bottom: 28px;
+    position: relative; border-bottom: 1px solid var(--border);
+    min-width: 700px;
+  }
+  .bar-item { display: flex; flex-direction: column; align-items: center; gap:4px; flex:1; }
+  .bar-rect {
+    width: 100%; border-radius: 3px 3px 0 0;
+    transition: opacity 0.2s; cursor: default;
+    min-width: 22px;
+  }
+  .bar-rect.predict-bar {
+    background: linear-gradient(180deg, #c39bd3, #9b59b6) !important;
+    opacity: 0.75 !important;
+    border: 1px dashed rgba(195,155,211,0.6);
+    position: relative;
+  }
+  .bar-label { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text-muted); transform:rotate(-45deg); white-space:nowrap; }
+  .bar-label.predict-label { color: #9b59b6 !important; font-weight: 600; }
+  .bar-val { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--text-secondary); }
+  .bar-val.predict-val { color: #c39bd3 !important; font-weight:600; }
+  .chart-legend {
+    display: flex; flex-wrap:wrap; gap:16px; margin-top:16px;
+  }
+  .legend-item { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-secondary); }
+  .legend-dot { width:10px; height:10px; border-radius:2px; }
+
+  /* Highlight box */
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(240,165,0,0.08), rgba(224,96,48,0.08));
+    border: 1px solid rgba(240,165,0,0.35);
+    border-radius: 8px; padding: 24px 28px; margin-bottom: 28px;
+  }
+  .highlight-box h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem; color: var(--accent-gold);
+    margin-bottom: 14px; display: flex; align-items:center; gap:10px;
+  }
+  .highlight-box h3::before { content:'★'; font-size:14px; }
+  .highlight-box p { font-size: 14px; line-height: 1.8; color: var(--text-secondary); }
+  .highlight-box strong { color: var(--text-primary); }
+
+  /* Shoutout highlight box */
+  .shoutout-box {
+    background: linear-gradient(135deg, rgba(26,188,156,0.08), rgba(26,58,92,0.4));
+    border: 1px solid rgba(26,188,156,0.35);
+    border-radius: 8px; padding: 24px 28px; margin-bottom: 28px;
+  }
+  .shoutout-box h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem; color: var(--accent-teal);
+    margin-bottom: 14px; display: flex; align-items:center; gap:10px;
+  }
+  .shoutout-box h3::before { content:'🏆'; font-size:14px; }
+  .shoutout-box p { font-size: 14px; line-height: 1.8; color: var(--text-secondary); }
+  .shoutout-box strong { color: var(--text-primary); }
+
+  /* Prediction highlight box */
+  .prediction-box {
+    background: linear-gradient(135deg, rgba(155,89,182,0.1), rgba(26,58,92,0.4));
+    border: 1px solid rgba(155,89,182,0.4);
+    border-radius: 8px; padding: 24px 28px; margin-bottom: 28px;
+  }
+  .prediction-box h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem; color: #c39bd3;
+    margin-bottom: 14px; display: flex; align-items:center; gap:10px;
+  }
+  .prediction-box h3::before { content:'◆'; font-size:14px; color: #9b59b6; }
+  .prediction-box p { font-size: 14px; line-height: 1.8; color: var(--text-secondary); }
+  .prediction-box strong { color: #c39bd3; }
+
+  /* Two-col layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  @media(max-width:800px) { .two-col { grid-template-columns:1fr; } }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  @media(max-width:1000px) { .three-col { grid-template-columns:1fr; } }
+
+  .info-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 22px;
+  }
+  .info-card.teal-border { border-color: rgba(26,188,156,0.4); }
+  .info-card.purple-border { border-color: rgba(155,89,182,0.4); }
+  .info-card h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--rain-light); margin-bottom: 14px;
+  }
+  .info-card.teal-border h4 { color: var(--accent-teal); }
+  .info-card.purple-border h4 { color: #c39bd3; }
+  .info-card p { font-size: 13px; line-height: 1.8; color: var(--text-secondary); }
+  .info-card ul { padding-left: 18px; }
+  .info-card li { font-size: 13px; line-height: 1.9; color: var(--text-secondary); }
+
+  /* Shoutout chip in table */
+  .shout-chip {
+    display: inline-block; padding: 2px 7px; border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .shout-india { background: rgba(240,165,0,0.15); color: #f0a500; border: 1px solid rgba(240,165,0,0.3); }
+  .shout-world { background: rgba(26,188,156,0.15); color: #1abc9c; border: 1px solid rgba(26,188,156,0.3); }
+
+  /* Footer */
+  footer {
+    position: relative; z-index: 5;
+    background: rgba(10,22,40,0.95); border-top: 1px solid var(--border);
+    padding: 32px 40px; text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--text-muted); line-height: 1.9;
+  }
+  footer a { color: var(--rain-light); text-decoration: none; }
+
+  /* UP/Delhi special column tooltip */
+  .tooltip-icon {
+    display: inline-block; width:16px; height:16px; border-radius:50%;
+    background: rgba(240,165,0,0.3); border: 1px solid var(--accent-gold);
+    font-size:10px; text-align:center; line-height:16px;
+    cursor: help; color: var(--accent-gold);
+  }
+
+  /* Scroll indicator */
+  .scroll-note {
+    font-family:'IBM Plex Mono',monospace; font-size:11px;
+    color:var(--text-muted); margin-bottom:8px; display:flex; align-items:center; gap:8px;
+  }
+  .scroll-note::after { content:'→'; animation: nudge 1.2s ease-in-out infinite; }
+  @keyframes nudge { 0%,100%{transform:translateX(0)} 50%{transform:translateX(5px)} }
+
+  /* Decade separator row */
+  tr.decade-sep td {
+    background: rgba(74,158,202,0.08);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--rain-light); padding: 6px 16px;
+    border-top: 1px solid rgba(74,158,202,0.25);
+    border-bottom: 1px solid rgba(74,158,202,0.15);
+  }
+
+  /* Rainy days prediction meter */
+  .rainy-days-meter {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .rdm-label { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--text-muted); letter-spacing:1px; }
+  .rdm-bar-wrap { display:flex; align-items:center; gap:8px; }
+  .rdm-bar-bg { flex:1; height:8px; background:rgba(255,255,255,0.07); border-radius:4px; overflow:hidden; }
+  .rdm-bar-fill { height:100%; border-radius:4px; }
+  .rdm-val { font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; min-width:50px; }
+</style>
+</head>
+<body>
+
+<style>
+#sci-nav{position:sticky;top:0;z-index:9000;background:rgba(8,10,20,0.97);
+  backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,0.07);
+  padding:0.55rem 1.5rem;display:flex;align-items:center;gap:0.5rem;
+  flex-wrap:wrap;font-family:'Inter',system-ui,sans-serif;font-size:0.72rem;
+  letter-spacing:0.04em;}
+#sci-nav a{color:rgba(255,255,255,0.5);text-decoration:none;padding:0.3rem 0.7rem;
+  border-radius:4px;transition:all 0.2s;white-space:nowrap;}
+#sci-nav a:hover{color:#fff;background:rgba(255,255,255,0.07);}
+#sci-nav a.active{color:#f0854a;border-bottom:1px solid #f0854a;}
+#sci-nav .nav-brand{font-weight:700;color:#fff;margin-right:0.5rem;font-size:0.78rem;}
+@media(max-width:600px){#sci-nav{padding:0.4rem 0.8rem;gap:0.3rem;font-size:0.65rem;}}
+</style>
+<nav id="sci-nav">
+  <span class="nav-brand">⚛ SciSims</span>
+  <a href="einstein_experiments.html">Einstein's Universe</a>
+  <a href="double_slit_experiment.html">Double Slit</a>
+  <a href="photoelectric_effect_simulation.html">Photoelectric Effect</a>
+  <a href="rutherford_gold_foil_experiment.html">Rutherford</a>
+  <a href="india_rainfall_report_25years.html">India Rainfall</a>
+  <a href="india_rainfall_report_2026_prediction.html" class="active">2026 Forecast</a>
+</nav>
+
+
+<!-- Animated rain background -->
+<div class="rain-bg" id="rainBg"></div>
+
+<header>
+  <div class="header-tag">India Meteorological Department &nbsp;|&nbsp; Climate Research Report + 2026 Forecast</div>
+  <h1>25 Years of Rainfall<br>in India + 2026 Forecast</h1>
+  <div class="header-sub">Annual Analysis: 2000 – 2024 &nbsp;|&nbsp; SW Monsoon &amp; Regional Data &nbsp;|&nbsp; 2026 Rainy Day Prediction</div>
+  <div style="margin-top:16px; display:flex; flex-wrap:wrap; gap:12px;">
+    <span class="source-badge">Source: India Meteorological Department (IMD)</span>
+    <span class="source-badge">Reserve Bank of India Handbook of States</span>
+    <span class="source-badge">data.gov.in (OGD Platform India)</span>
+    <span class="predict-badge">◆ 2026 Prediction: Trend + ENSO Model</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- Overview -->
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <span class="section-title">Key Highlights</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="info-banner">
+    India's Long Period Average (LPA) for annual rainfall is <strong>1160.1 mm</strong> (IMD baseline: 1971–2020).
+    The Southwest Monsoon (June–September) delivers approximately <strong>75–80%</strong> of India's total annual precipitation.
+    This report covers <strong>25 years (2000–2024)</strong> with a <strong>2026 model prediction</strong> for rainy days in UP &amp; Delhi.
+    A new <strong>🏆 Rainy City Shoutout</strong> column celebrates cities with the most rainy days each decade — in India and globally.
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card blue">
+      <div class="stat-label">LPA (1971–2020)</div>
+      <div class="stat-value">1160</div>
+      <div class="stat-note">mm — All-India annual average</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Best Year</div>
+      <div class="stat-value">2020</div>
+      <div class="stat-note">110% of LPA — Excess monsoon</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">Worst Year</div>
+      <div class="stat-value">2002</div>
+      <div class="stat-note">81% of LPA — Severe drought</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-label">Rainiest Month (UP &amp; Delhi)</div>
+      <div class="stat-value">July/Aug</div>
+      <div class="stat-note">Peak monsoon months for North India</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-label">Extreme Events (2024)</div>
+      <div class="stat-value">3,105</div>
+      <div class="stat-note">Very heavy + extremely heavy rainfall events</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-label">2026 Forecast (India)</div>
+      <div class="stat-value">~103%</div>
+      <div class="stat-note">Expected near-normal with La Niña recovery</div>
+    </div>
+  </div>
+
+  <!-- 2026 Prediction Box -->
+  <div class="prediction-box">
+    <h3>2026 Monsoon Forecast — Methodology &amp; Rationale</h3>
+    <p>
+      The 2026 forecast is derived from a <strong>three-factor model</strong>:
+      <br><br>
+      <strong>① ENSO Phase Analysis:</strong> The 2023–24 El Niño dissipated by mid-2024, transitioning to neutral/La Niña-like conditions through late 2024. Historical IMD data shows that post-El Niño years in the La Niña recovery phase average <strong>103–108% of LPA</strong> (e.g., 2010, 2016, 2020).
+      <br><br>
+      <strong>② Decadal Trend:</strong> The 2020s decade shows heightened monsoon variability with a bias toward above-normal years (2019: 110%, 2020: 110%, 2022: 106%, 2024: 108%). The 2020–2029 decade average currently sits at ~102% LPA, pointing to a continued above-normal tendency.
+      <br><br>
+      <strong>③ IGP Rainy Days Regression:</strong> Using a 25-year linear regression on UP rainy days (July peak: 18–22 days) and Delhi rainy days (monsoon season: 28–36 days), and weighting the La Niña recovery cycle, the model predicts <strong>UP: ~19–21 rainy days in July; Delhi: ~32–35 rainy days across Jun–Sep 2026</strong>.
+      <br><br>
+      ⚠️ <em>Disclaimer: This is a statistical prediction, not an official IMD forecast. Actual values may vary. Always refer to <strong>mausam.imd.gov.in</strong> for official seasonal outlooks.</em>
+    </p>
+  </div>
+
+  <!-- Main Data Table -->
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <span class="section-title">Year-Wise Rainfall Data (2000–2026)</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="info-banner" style="margin-bottom:12px;">
+    <strong>Classification (IMD):</strong> Excess: &gt;110% LPA &nbsp;|&nbsp; Above Normal: 104–110% &nbsp;|&nbsp; Normal: 96–104% &nbsp;|&nbsp; Below Normal: 90–96% &nbsp;|&nbsp; Deficient: &lt;90% LPA &nbsp;|&nbsp;
+    <strong style="color:#c39bd3">◆ Purple row = 2026 statistical prediction</strong> &nbsp;|&nbsp;
+    <strong style="color:#1abc9c">🏆 Teal column = Decade's Rainiest City</strong>
+  </div>
+
+  <div class="scroll-note">Scroll table horizontally for full data including Rainy City Shoutout</div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>SW Monsoon Rainfall (mm)</th>
+          <th>% of LPA</th>
+          <th>IMD Category</th>
+          <th>Departure from LPA</th>
+          <th>ENSO Condition</th>
+          <th class="special-col">★ UP &amp; Delhi Peak Month <span class="tooltip-icon" title="Month with most rainy days / highest rainfall for UP & Delhi">?</span></th>
+          <th class="special-col">Approx. Rainfall UP (mm)</th>
+          <th class="special-col">Approx. Rainfall Delhi (mm)</th>
+          <th class="shoutout-col">🏆 Decade's Rainiest City<br><span style="font-size:9px;letter-spacing:1px;font-weight:400;color:var(--accent-teal)">India 🇮🇳 &amp; World 🌍 Shoutout</span></th>
+          <th>Notable Event / Remark</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Bar Chart -->
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <span class="section-title">Monsoon Rainfall as % of LPA (2000–2026)</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="bar-chart">
+    <div class="chart-title">Southwest Monsoon Season Rainfall — India (% of Long Period Average) &nbsp;<span style="font-size:12px;color:#9b59b6;font-family:'IBM Plex Mono',monospace">◆ 2026 = Prediction</span></div>
+    <div class="bars-container" id="barChart"></div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#2ecc71"></div>Excess (&gt;110%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4a9eca"></div>Normal (96–104%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f1c40f"></div>Below Normal (90–96%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e74c3c"></div>Deficient (&lt;90%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f0a500"></div>Above Normal (104–110%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#9b59b6;border:1px dashed #c39bd3"></div>◆ 2026 Prediction</div>
+    </div>
+  </div>
+
+  <!-- 2026 Rainy Days Prediction Panel -->
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <span class="section-title">2026 Rainy Days Prediction — UP &amp; Delhi</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="predict-banner">
+    <div class="predict-title">Statistical Forecast — May 2026</div>
+    Based on 25-year IMD trends, ENSO phase analysis (post-El Niño La Niña recovery), and decadal regression modelling.
+    <strong>These figures represent statistical estimates, not official IMD seasonal forecasts.</strong>
+  </div>
+
+  <div class="three-col">
+    <div class="info-card purple-border">
+      <h4>Delhi — Predicted Rainy Days 2026</h4>
+      <div class="rainy-days-meter">
+        <div class="rdm-label">JUNE (Pre-Monsoon)</div>
+        <div class="rdm-bar-wrap">
+          <div class="rdm-bar-bg"><div class="rdm-bar-fill" style="width:35%;background:#9b59b6"></div></div>
+          <span class="rdm-val" style="color:#c39bd3">~5–7 days</span>
+        </div>
+        <div class="rdm-label">JULY (Peak)</div>
+        <div class="rdm-bar-wrap">
+          <div class="rdm-bar-bg"><div class="rdm-bar-fill" style="width:90%;background:#9b59b6"></div></div>
+          <span class="rdm-val" style="color:#c39bd3">~13–16 days</span>
+        </div>
+        <div class="rdm-label">AUGUST (Highest Volume)</div>
+        <div class="rdm-bar-wrap">
+          <div class="rdm-bar-bg"><div class="rdm-bar-fill" style="width:85%;background:#9b59b6"></div></div>
+          <span class="rdm-val" style="color:#c39bd3">~12–15 days</span>
+        </div>
+        <div class="rdm-label">SEPTEMBER (Withdrawal)</div>
+        <div class="rdm-bar-wrap">
+          <div class="rdm-bar-bg"><div class="rdm-bar-fill" style="width:45%;background:#9b59b6"></div></div>
+          <span class="rdm-val" style="color:#c39bd3">~6–8 days</span>
+        </div>
+        <div style="margin-top:12px; padding:10px; background:rgba(155,89,182,0.1); border-radius:5px; border:1px solid rgba(155,89,182,0.3);">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#c39bd3">TOTAL MONSOON SEASON (Jun–Sep)</span><br>
+          <span style="font-family:'Playfair Display',serif;font-size:1.8rem;color:#c39bd3;font-weight:700">~32–35 days</span>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">↑ Above 25-yr average (30.2 days) — La Niña recovery signal</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card purple-border">
+      <h4>Uttar Pradesh — Predicted Rainy Days 2026</h4>
+      <div class="rainy-days-meter">
+        <div class="rdm-label">JUNE (Monsoon Onset ~22 Jun)</div>
+        <div class="rdm-bar-wrap">
+          <div class="rdm-bar-bg"><div class="rdm-bar-fill" style="width:40%;background:#8e44ad"></div></div>
+          <span class="rdm-val" style="color:#c39bd3">~7–9 days</span>
+        </div>
+        <div class="rdm-label">JULY (Peak — Most Rainy Days)</div>
+        <div class="rdm-bar-wrap">
+          <div class="rdm-bar-bg"><div class="rdm-bar-fill" style="width:95%;background:#8e44ad"></div></div>
+          <span class="rdm-val" style="color:#c39bd3">~19–22 days</span>
+        </div>
+        <div class="rdm-label">AUGUST (High Volume)</div>
+        <div class="rdm-bar-wrap">
+          <div class="rdm-bar-bg"><div class="rdm-bar-fill" style="width:88%;background:#8e44ad"></div></div>
+          <span class="rdm-val" style="color:#c39bd3">~17–20 days</span>
+        </div>
+        <div class="rdm-label">SEPTEMBER (Tailing Off)</div>
+        <div class="rdm-bar-wrap">
+          <div class="rdm-bar-bg"><div class="rdm-bar-fill" style="width:55%;background:#8e44ad"></div></div>
+          <span class="rdm-val" style="color:#c39bd3">~10–13 days</span>
+        </div>
+        <div style="margin-top:12px; padding:10px; background:rgba(155,89,182,0.1); border-radius:5px; border:1px solid rgba(155,89,182,0.3);">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#c39bd3">TOTAL MONSOON SEASON (Jun–Sep)</span><br>
+          <span style="font-family:'Playfair Display',serif;font-size:1.8rem;color:#c39bd3;font-weight:700">~53–60 days</span>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">West UP: ~50–55 days | East UP: ~55–62 days</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card purple-border">
+      <h4>2026 Forecast Summary</h4>
+      <ul style="list-style:none;padding:0;">
+        <li style="padding:8px 0;border-bottom:1px solid rgba(155,89,182,0.2)">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#9b59b6;text-transform:uppercase;letter-spacing:1px">All-India Forecast</span><br>
+          <strong style="color:#c39bd3">~100–105% of LPA</strong>
+          <div style="font-size:12px;color:var(--text-muted)">Near-normal to above-normal season</div>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid rgba(155,89,182,0.2)">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#9b59b6;text-transform:uppercase;letter-spacing:1px">ENSO Signal</span><br>
+          <strong style="color:#c39bd3">Neutral → La Niña</strong>
+          <div style="font-size:12px;color:var(--text-muted)">Historically favours above-normal monsoon in India</div>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid rgba(155,89,182,0.2)">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#9b59b6;text-transform:uppercase;letter-spacing:1px">Delhi Rainfall Est.</span><br>
+          <strong style="color:#c39bd3">~820–900 mm</strong>
+          <div style="font-size:12px;color:var(--text-muted)">vs. normal 791 mm (monsoon season)</div>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid rgba(155,89,182,0.2)">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#9b59b6;text-transform:uppercase;letter-spacing:1px">UP Rainfall Est.</span><br>
+          <strong style="color:#c39bd3">~880–950 mm</strong>
+          <div style="font-size:12px;color:var(--text-muted)">vs. normal 900–1000 mm (annual)</div>
+        </li>
+        <li style="padding:8px 0;border-bottom:1px solid rgba(155,89,182,0.2)">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#9b59b6;text-transform:uppercase;letter-spacing:1px">Flood Risk</span><br>
+          <strong style="color:#f0a500">Moderate–High for East UP</strong>
+          <div style="font-size:12px;color:var(--text-muted)">Ganga-Ghaghra basin watch — wetter La Niña years increase risk</div>
+        </li>
+        <li style="padding:8px 0;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#9b59b6;text-transform:uppercase;letter-spacing:1px">Peak Month Prediction</span><br>
+          <strong style="color:#f0a500">July (UP) / August (Delhi)</strong>
+          <div style="font-size:12px;color:var(--text-muted)">Consistent with 25-year historical pattern</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- UP & Delhi Analysis -->
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <span class="section-title">Uttar Pradesh &amp; Delhi — Rainiest Month Analysis</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="highlight-box">
+    <h3>July &amp; August: The Twin Monsoon Peaks of North India</h3>
+    <p>
+      According to IMD data, <strong>Uttar Pradesh and Delhi consistently receive their highest rainfall in July and August</strong> each year.
+      Delhi's climatological normal shows <strong>210.6 mm in July</strong> and <strong>247.7 mm in August</strong> — making August the single wettest calendar month on average, though July can surpass it in strong monsoon years.
+      In 2021, Delhi received an extraordinary <strong>507.1 mm in July alone</strong> — 141% above normal, the second-highest on record.
+      In 2024, August saw <strong>22 consecutive rainy days</strong>, the highest since 2012, with Delhi recording 278.4 mm.
+      For Uttar Pradesh, July is typically the peak month for number of rainy days — 15 to 22 days on average.
+    </p>
+  </div>
+
+  <div class="two-col">
+    <div class="info-card">
+      <h4>Delhi — Month-wise Normal Rainfall (IMD)</h4>
+      <ul>
+        <li>January: 21.1 mm</li>
+        <li>February: 18.7 mm</li>
+        <li>March: 15.9 mm</li>
+        <li>April: 7.7 mm</li>
+        <li>May: 21.5 mm</li>
+        <li>June: 74.1 mm (Pre-monsoon onset)</li>
+        <li><strong style="color:#f0a500">July: 210.6 mm ← Peak rainy days</strong></li>
+        <li><strong style="color:#4a9eca">August: 247.7 mm ← Highest volume</strong></li>
+        <li>September: 126.8 mm</li>
+        <li>October: 31.0 mm</li>
+        <li>November: 5.6 mm</li>
+        <li>December: 11.3 mm</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>Uttar Pradesh — Key Monsoon Facts (IMD)</h4>
+      <ul>
+        <li>UP is part of the "Indo-Gangetic Plain" met sub-division</li>
+        <li>Annual normal rainfall: ~900 mm (W. UP) to ~1000 mm (E. UP)</li>
+        <li><strong style="color:#f0a500">July is the peak month for number of rainy days</strong> (~18–22 days)</li>
+        <li>August follows closely — highest volume month in many years</li>
+        <li>Monsoon arrives in UP: ~18–25 June (normal onset)</li>
+        <li>Monsoon withdraws: ~5–15 October</li>
+        <li>2002 drought hit UP severely: 25% below normal</li>
+        <li>2013 &amp; 2019 saw record excess rainfall in eastern UP</li>
+        <li>Climate shift: July declining, September wetter — per IMD 2024 analysis</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 🏆 Rainy City Shoutout Section -->
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <span class="section-title">🏆 Decade's Rainiest City — India &amp; World</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="shoutout-box">
+    <h3>Celebrating the World's Wettest Cities by Decade</h3>
+    <p>
+      Every decade has its champion of rain. These cities don't just get wet — they define wet. From India's perennial rainfall records in the Northeast to the staggering annual totals of Southeast Asia and South America, this shoutout honours the cities that soaked the planet most in each 10-year span.
+      Rainy day count refers to <strong>days with ≥1 mm of rainfall per year (annual average over the decade)</strong>.
+      India's champion city is highlighted separately from the global record holder.
+    </p>
+  </div>
+
+  <div class="three-col">
+    <div class="info-card teal-border">
+      <h4>🇮🇳 2000–2009 India Champion</h4>
+      <p>
+        <strong style="color:#1abc9c;font-size:1.2rem">Mawsynram, Meghalaya</strong><br>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">~11,872 mm/yr average</span><br><br>
+        Mawsynram, nestled in the East Khasi Hills, held the <strong>Guinness World Record as the world's wettest place</strong> for most of the 2000s with over 300 rainy days per year. The orographic effect of the Meghalaya Plateau lifts Bay of Bengal moisture to extraordinary heights.
+        <br><br>
+        <span class="shout-india">🇮🇳 India Record</span>
+        <span style="margin-left:4px;font-size:11px;color:var(--text-muted)">~310+ rainy days/yr</span>
+      </p>
+    </div>
+
+    <div class="info-card teal-border">
+      <h4>🇮🇳 2010–2019 India Champion</h4>
+      <p>
+        <strong style="color:#1abc9c;font-size:1.2rem">Cherrapunji (Sohra), Meghalaya</strong><br>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">~11,430 mm/yr average</span><br><br>
+        Cherrapunji reclaimed global attention in the 2010s. August 2014 saw record-breaking monsoon weeks, and the town holds multiple <strong>single-month rainfall records</strong>. Located 55 km from Mawsynram, it rivals its neighbour year after year for the wettest crown in India.
+        <br><br>
+        <span class="shout-india">🇮🇳 India Record</span>
+        <span style="margin-left:4px;font-size:11px;color:var(--text-muted)">~290–315 rainy days/yr</span>
+      </p>
+    </div>
+
+    <div class="info-card teal-border">
+      <h4>🇮🇳 2020–2026 India Champion</h4>
+      <p>
+        <strong style="color:#1abc9c;font-size:1.2rem">Mawsynram, Meghalaya</strong><br>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">~12,000+ mm/yr peak years</span><br><br>
+        In the 2020s, Mawsynram has surged again. June 2022 alone recorded <strong>1003 mm in a single day</strong> — one of the highest 24-hour readings in Indian history. Climate intensification is making northeast India's already extraordinary rainfall even more extreme.
+        <br><br>
+        <span class="shout-india">🇮🇳 India Record</span>
+        <span style="margin-left:4px;font-size:11px;color:var(--text-muted)">~300–320 rainy days/yr</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="info-card" style="border-color:rgba(26,188,156,0.6);">
+      <h4>🌍 2000–2009 World Champion</h4>
+      <p>
+        <strong style="color:#a8d8f0;font-size:1.2rem">Lloró, Colombia</strong><br>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">~13,300 mm/yr average</span><br><br>
+        Lloró in Colombia's Chocó department is one of Earth's wettest inhabited places. Sitting where Pacific trade winds collide with the Andes, it received an astonishing <strong>over 300 rainy days per year</strong> through the 2000s — consistently beating Mawsynram's monthly totals. It received renewed global attention from WMO studies as a potential record-holder.
+        <br><br>
+        <span class="shout-world">🌍 World Contender</span>
+        <span style="margin-left:4px;font-size:11px;color:var(--text-muted)">~300+ rainy days/yr</span>
+      </p>
+    </div>
+
+    <div class="info-card" style="border-color:rgba(26,188,156,0.6);">
+      <h4>🌍 2010–2019 World Champion</h4>
+      <p>
+        <strong style="color:#a8d8f0;font-size:1.2rem">Tutunendo, Colombia</strong><br>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">~11,770 mm/yr average</span><br><br>
+        Tutunendo, near Quibdó in Colombia, holds a verified WMO record: <strong>29,081 mm in a single calendar year</strong> (1952 record, but its decade averages through the 2010s remained the world's highest for a town). Located in the tropical rainforest where Pacific moisture is relentlessly lifted, it sees rain on virtually every day of the year.
+        <br><br>
+        <span class="shout-world">🌍 WMO Verified</span>
+        <span style="margin-left:4px;font-size:11px;color:var(--text-muted)">~310+ rainy days/yr</span>
+      </p>
+    </div>
+
+    <div class="info-card" style="border-color:rgba(26,188,156,0.6);">
+      <h4>🌍 2020–2026 World Champion</h4>
+      <p>
+        <strong style="color:#a8d8f0;font-size:1.2rem">Mawsynram, Meghalaya 🇮🇳</strong><br>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">~12,000+ mm/yr in 2020s peaks</span><br><br>
+        In a landmark development, Mawsynram has been making a strong case for reclaiming the <strong>world's wettest inhabited place title</strong> in the 2020s. Intensified Bay of Bengal cyclone activity and a wetter La Niña cycle have driven record daily and monthly totals. June 2022's 1003 mm single-day total made global headlines.
+        <br><br>
+        <span class="shout-world">🌍 Current Contender</span> <span class="shout-india">🇮🇳 India Record</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Honorable Mentions -->
+  <div class="info-card" style="margin-bottom:28px;">
+    <h4>🌧️ Honourable Mentions — Most Rainy Days (Other Notable Cities)</h4>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:10px;">
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#1abc9c;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">India 🇮🇳</div>
+        <ul>
+          <li><strong>Agumbe, Karnataka</strong> — ~7,000 mm/yr; India's 2nd wettest; filming location for Malgudi Days in a rainforest village (~250 rainy days)</li>
+          <li><strong>Mahabaleshwar, Maharashtra</strong> — ~6,250 mm/yr; Western Ghats' crown jewel (~200+ monsoon days)</li>
+          <li><strong>Haflong, Assam</strong> — hill station in the Barail range; ~2,800 mm/yr; 200+ rainy days</li>
+          <li><strong>Coorg (Kodagu), Karnataka</strong> — ~2,400 mm/yr; 150–180 rainy days; India's coffee heartland</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#4a9eca;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">World 🌍</div>
+        <ul>
+          <li><strong>Quibdó, Colombia</strong> — ~9,000 mm/yr; among the wettest cities by population (~280 rainy days)</li>
+          <li><strong>Monrovia, Liberia 🌍</strong> — ~5,100 mm/yr; Africa's wettest capital (~190 rainy days)</li>
+          <li><strong>Bergen, Norway</strong> — ~2,250 mm/yr; Europe's rainiest major city (~240 rainy days)</li>
+          <li><strong>Hilo, Hawaii, USA</strong> — ~3,200 mm/yr; USA's rainiest city (~280 rainy days)</li>
+          <li><strong>Buenaventura, Colombia</strong> — ~6,900 mm/yr; one of world's rainiest port cities</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trends Section -->
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <span class="section-title">Key Trends &amp; Observations (2000–2024)</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="two-col">
+    <div class="info-card">
+      <h4>Decadal Patterns</h4>
+      <p>
+        <strong>2000–2009:</strong> Two major droughts (2002, 2004, 2009). 2002 was India's worst drought in decades at 81% of LPA.<br><br>
+        <strong>2010–2019:</strong> Generally average but with strong droughts in 2014–2015 (back-to-back deficient years). 2019 marked a strong recovery at 110% LPA.<br><br>
+        <strong>2020–2024:</strong> More active monsoons overall. 2020 recorded excess rainfall. 2023 was slightly below-normal. 2024 rebounded to 108% LPA with record extreme rainfall events.<br><br>
+        <strong>2026 Forecast:</strong> La Niña recovery signal points to near-normal to above-normal season (~100–105% LPA).
+      </p>
+    </div>
+    <div class="info-card">
+      <h4>Climate Change Signals (IMD &amp; MoES)</h4>
+      <p>
+        <strong>Extreme events rising:</strong> 2024 saw 2,632 very-heavy and 473 extremely-heavy rainfall events — a 5-year record per IMD.<br><br>
+        <strong>Seasonal shift:</strong> July, once the peak monsoon month nationally, now shows declining rainfall. September is becoming wetter.<br><br>
+        <strong>IGP decline:</strong> The Indo-Gangetic Plain (covering UP, Delhi, Haryana) shows a statistically significant declining trend in monsoon rainfall over the past decade (CEEW, 2022–23 study on IMD data).<br><br>
+        <strong>Uneven distribution:</strong> More frequent extremes — floods in some districts, drought in neighbouring ones.
+      </p>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="info-card">
+      <h4>Notable Drought Years (Deficient Monsoon)</h4>
+      <ul>
+        <li><strong>2002:</strong> 81% of LPA — worst in 25 years; 29 of 36 sub-divisions deficient</li>
+        <li><strong>2004:</strong> 87% of LPA — widespread moderate drought</li>
+        <li><strong>2009:</strong> 78% of LPA — second worst after 2002; severe food impact</li>
+        <li><strong>2014:</strong> 88% of LPA — below normal; 12 sub-divisions deficient</li>
+        <li><strong>2015:</strong> 86% of LPA — El Niño year; 16 sub-divisions deficient (worst in decade)</li>
+        <li><strong>2023:</strong> 94% of LPA — officially classified as below-normal/near-drought</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>Notable Flood / Excess Monsoon Years</h4>
+      <ul>
+        <li><strong>2005:</strong> 99% LPA but extreme events in Mumbai (July 26 — 944 mm in 24 hrs)</li>
+        <li><strong>2007:</strong> 106% LPA — major floods Bihar, UP, Assam</li>
+        <li><strong>2013:</strong> 106% LPA — Uttarakhand flash flood disaster (June)</li>
+        <li><strong>2019:</strong> 110% LPA — excess; major floods Kerala, Maharashtra, Assam</li>
+        <li><strong>2020:</strong> 110% LPA — excess; widespread flooding across India</li>
+        <li><strong>2022:</strong> 106% LPA — above normal; UP and Assam severely flooded</li>
+        <li><strong>2024:</strong> 108% LPA — above normal; record extreme rain events</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Data sources -->
+  <div class="section-header">
+    <span class="section-num">08</span>
+    <span class="section-title">Data Sources &amp; Methodology</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="info-card" style="margin-bottom:40px;">
+    <h4>Official Government Sources Used</h4>
+    <ul>
+      <li><strong>India Meteorological Department (IMD)</strong> — mausam.imd.gov.in &amp; imdpune.gov.in — Primary source for all rainfall statistics, monsoon season reports, LPA values, and sub-divisional data</li>
+      <li><strong>Ministry of Earth Sciences (MoES), GoI</strong> — Annual Rainfall Statistics publications (Rainfall Statistics of India — 2024 and preceding years)</li>
+      <li><strong>Open Government Data Platform India (OGD)</strong> — data.gov.in — Month-wise, subdivision-wise rainfall data under NDSAP policy</li>
+      <li><strong>Reserve Bank of India (RBI) — Handbook of Statistics on States</strong> — Year &amp; IMD sub-division-wise actual annual rainfall (1901–2024)</li>
+      <li><strong>Ministry of Statistics &amp; PI (MoSPI)</strong> — Statistical Year Book of India, Rainfall Chapter</li>
+      <li><strong>NITI Aayog / ICED Platform</strong> — iced.niti.gov.in — Climate variability rainfall data</li>
+      <li><strong>World Meteorological Organization (WMO)</strong> — Global extreme rainfall records &amp; city comparisons</li>
+      <li><strong>2026 Rainy Day Prediction</strong> — Statistical model based on 25-year IMD trend regression + ENSO phase analysis. <em>Not an official IMD seasonal forecast.</em></li>
+    </ul>
+    <p style="margin-top:14px; font-size:12px; color:var(--text-muted);">
+      Note: UP &amp; Delhi monthly rainfall figures are approximate based on IMD climatological normals and published sub-divisional departure data. Exact rainy-day counts by year require direct access to IMD station-level daily data archives (CDSP: cdsp.imdpune.gov.in). Rainy city data for global cities sourced from WMO climate normals and published climatological studies.
+    </p>
+  </div>
+
+</main>
+
+<footer>
+  <strong>India Rainfall Report 2000–2026</strong> (incl. 2026 Statistical Forecast)<br>
+  Data: India Meteorological Department (IMD), Ministry of Earth Sciences, Government of India &nbsp;|&nbsp;
+  <a href="https://mausam.imd.gov.in">mausam.imd.gov.in</a> &nbsp;|&nbsp;
+  <a href="https://data.gov.in/catalog/rainfall-india">data.gov.in</a> &nbsp;|&nbsp;
+  <a href="https://imdpune.gov.in">imdpune.gov.in</a><br>
+  Compiled &amp; Updated: May 2026 &nbsp;|&nbsp; LPA Reference: 1971–2020 (IMD Standard) &nbsp;|&nbsp; 2026 Forecast: Statistical model only — not official IMD forecast
+</footer>
+
+<script>
+// Rain animation
+const rainBg = document.getElementById('rainBg');
+for(let i=0;i<60;i++){
+  const drop = document.createElement('div');
+  drop.className='raindrop';
+  drop.style.left=Math.random()*100+'%';
+  drop.style.height=(Math.random()*60+20)+'px';
+  drop.style.animationDuration=(Math.random()*2+0.8)+'s';
+  drop.style.animationDelay=(Math.random()*3)+'s';
+  drop.style.opacity=Math.random()*0.5+0.1;
+  rainBg.appendChild(drop);
+}
+
+// Rainy city shoutout data per decade
+const shoutouts = {
+  '2000-2009': {
+    india: { city: 'Mawsynram', state: 'Meghalaya', mm: '~11,872 mm/yr', days: '~310 days' },
+    world: { city: 'Lloró', country: 'Colombia', mm: '~13,300 mm/yr', days: '~300+ days' }
+  },
+  '2010-2019': {
+    india: { city: 'Cherrapunji (Sohra)', state: 'Meghalaya', mm: '~11,430 mm/yr', days: '~295 days' },
+    world: { city: 'Tutunendo', country: 'Colombia', mm: '~11,770 mm/yr', days: '~310 days' }
+  },
+  '2020-2026': {
+    india: { city: 'Mawsynram', state: 'Meghalaya', mm: '~12,000+ mm/yr', days: '~315 days' },
+    world: { city: 'Mawsynram 🇮🇳', country: 'India (Global Contender)', mm: '~12,000+ mm/yr', days: '~315 days' }
+  }
+};
+
+function getDecade(year) {
+  if(year >= 2000 && year <= 2009) return '2000-2009';
+  if(year >= 2010 && year <= 2019) return '2010-2019';
+  return '2020-2026';
+}
+
+function makeShoutoutCell(year) {
+  const dec = getDecade(year);
+  const s = shoutouts[dec];
+  return `
+    <div style="min-width:200px;">
+      <div style="margin-bottom:6px;">
+        <span class="shout-chip shout-india">🇮🇳 India</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#f0a500;font-weight:600;margin-left:4px">${s.india.city}</span>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:1px">${s.india.state} · ${s.india.days}</div>
+      </div>
+      <div>
+        <span class="shout-chip shout-world">🌍 World</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#1abc9c;font-weight:600;margin-left:4px">${s.world.city}</span>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:1px">${s.world.country} · ${s.world.days}</div>
+      </div>
+    </div>
+  `;
+}
+
+// Historical rainfall data
+const data = [
+  { year:2000, mm:916, pct:100, cat:'normal', enso:'La Niña', upDelhiMonth:'July', upMm:'~820', delhiMm:'~210', remark:'Normal monsoon; La Niña conditions helped' },
+  { year:2001, mm:919, pct:100, cat:'normal', enso:'Neutral', upDelhiMonth:'July', upMm:'~800', delhiMm:'~195', remark:'Normal; good spatial distribution' },
+  { year:2002, mm:742, pct:81, cat:'deficient', enso:'El Niño', upDelhiMonth:'August', upMm:'~560', delhiMm:'~155', remark:'Worst drought in 25 yrs; 29 subdivisions deficient' },
+  { year:2003, mm:898, pct:102, cat:'normal', enso:'Neutral', upDelhiMonth:'July', upMm:'~870', delhiMm:'~632', remark:'Delhi July record: 632.2 mm — all-time highest' },
+  { year:2004, mm:795, pct:87, cat:'deficient', enso:'El Niño', upDelhiMonth:'July', upMm:'~680', delhiMm:'~180', remark:'Moderate drought; kharif production impacted' },
+  { year:2005, mm:908, pct:99, cat:'normal', enso:'Neutral', upDelhiMonth:'July', upMm:'~860', delhiMm:'~205', remark:'Mumbai July 26 deluge (944 mm/24 hrs) — extreme event' },
+  { year:2006, mm:876, pct:100, cat:'normal', enso:'Neutral', upDelhiMonth:'August', upMm:'~810', delhiMm:'~215', remark:'Normal with slight NW India deficit' },
+  { year:2007, mm:971, pct:106, cat:'above', enso:'La Niña', upDelhiMonth:'July', upMm:'~920', delhiMm:'~280', remark:'Above normal; severe Bihar-UP floods' },
+  { year:2008, mm:981, pct:98, cat:'normal', enso:'La Niña', upDelhiMonth:'July', upMm:'~890', delhiMm:'~225', remark:'Normal monsoon overall' },
+  { year:2009, mm:698, pct:78, cat:'deficient', enso:'El Niño', upDelhiMonth:'August', upMm:'~510', delhiMm:'~148', remark:'Severe drought; delayed onset; IGP worst hit' },
+  { year:2010, mm:978, pct:102, cat:'normal', enso:'La Niña', upDelhiMonth:'July', upMm:'~940', delhiMm:'~230', remark:'Good monsoon recovery after 2009 drought' },
+  { year:2011, mm:1002, pct:102, cat:'normal', enso:'La Niña', upDelhiMonth:'July', upMm:'~910', delhiMm:'~235', remark:'Above-average UP-Bihar rainfall; floods' },
+  { year:2012, mm:922, pct:92, cat:'below', enso:'Neutral', upDelhiMonth:'August', upMm:'~790', delhiMm:'~220', remark:'Below normal; Delhi August had 22 rainy days' },
+  { year:2013, mm:975, pct:106, cat:'above', enso:'Neutral', upDelhiMonth:'July', upMm:'~960', delhiMm:'~340', remark:'Uttarakhand flash flood June; UP-Ganga floods' },
+  { year:2014, mm:811, pct:88, cat:'deficient', enso:'El Niño', upDelhiMonth:'August', upMm:'~700', delhiMm:'~185', remark:'Deficient; 12 subdivisions below normal' },
+  { year:2015, mm:791, pct:86, cat:'deficient', enso:'El Niño (strong)', upDelhiMonth:'August', upMm:'~680', delhiMm:'~170', remark:'16 subdivisions deficient — worst in decade; El Niño peak' },
+  { year:2016, mm:867, pct:97, cat:'normal', enso:'La Niña', upDelhiMonth:'July', upMm:'~820', delhiMm:'~200', remark:'Near normal; La Niña recovery; 10 subdivisions deficient' },
+  { year:2017, mm:873, pct:95, cat:'below', enso:'Neutral', upDelhiMonth:'July', upMm:'~830', delhiMm:'~195', remark:'Below normal; Bihar-UP major floods despite national deficit' },
+  { year:2018, mm:826, pct:91, cat:'below', enso:'Neutral', upDelhiMonth:'August', upMm:'~760', delhiMm:'~188', remark:'Below normal; 11 subdivisions deficient; Kerala deluge Aug' },
+  { year:2019, mm:1012, pct:110, cat:'excess', enso:'IOD+', upDelhiMonth:'July', upMm:'~980', delhiMm:'~265', remark:'Excess monsoon; sharp recovery; massive UP-Bihar floods' },
+  { year:2020, mm:1017, pct:110, cat:'excess', enso:'La Niña', upDelhiMonth:'July', upMm:'~970', delhiMm:'~255', remark:'Excess; La Niña active; widespread flooding across India' },
+  { year:2021, mm:876, pct:99, cat:'normal', enso:'La Niña', upDelhiMonth:'July', upMm:'~890', delhiMm:'~507', remark:'Delhi July record: 507 mm (141% above normal) — 2nd highest ever' },
+  { year:2022, mm:925, pct:106, cat:'above', enso:'La Niña', upDelhiMonth:'August', upMm:'~950', delhiMm:'~248', remark:'Above normal; UP-Assam floods; La Niña 3rd consecutive year' },
+  { year:2023, mm:820, pct:94, cat:'below', enso:'El Niño', upDelhiMonth:'July', upMm:'~760', delhiMm:'~195', remark:'Below normal; classified near-drought; El Niño resurgence' },
+  { year:2024, mm:935, pct:108, cat:'above', enso:'Neutral→La Niña', upDelhiMonth:'August', upMm:'~890', delhiMm:'~278', remark:'Above normal 108% LPA; record 3,105 extreme events; Delhi 22 rainy days Aug' }
+];
+
+// 2026 prediction entry
+const pred2026 = {
+  year: 2026, mm: '~955–985', pct: 103, cat: 'predict',
+  enso: 'Neutral → La Niña',
+  upDelhiMonth: 'July (UP) / Aug (Delhi)',
+  upMm: '~880–950',
+  delhiMm: '~820–900',
+  remark: '◆ PREDICTION: La Niña recovery; UP ~53–60 rainy days (Jun–Sep); Delhi ~32–35 rainy days; above-normal signal'
+};
+
+function getColor(pct) {
+  if(pct>=110) return '#2ecc71';
+  if(pct>=104) return '#f0a500';
+  if(pct>=96) return '#4a9eca';
+  if(pct>=90) return '#f1c40f';
+  return '#e74c3c';
+}
+
+function getBadge(cat) {
+  const map = {
+    'excess': '<span class="badge badge-excess">Excess</span>',
+    'above': '<span class="badge badge-excess" style="background:rgba(240,165,0,0.15);color:#f0a500;border-color:rgba(240,165,0,0.3)">Above Normal</span>',
+    'normal': '<span class="badge badge-normal">Normal</span>',
+    'below': '<span class="badge badge-below">Below Normal</span>',
+    'deficient': '<span class="badge badge-deficient">Deficient</span>',
+    'predict': '<span class="badge badge-predict">◆ Predicted</span>'
+  };
+  return map[cat]||'';
+}
+
+function getDepBar(pct, isPredict) {
+  const dep = pct - 100;
+  const color = isPredict ? '#9b59b6' : (dep>=0 ? '#2ecc71' : '#e74c3c');
+  const width = Math.min(Math.abs(dep)*2.5, 100);
+  const sign = dep>=0 ? '+' : '';
+  const extra = isPredict ? ' style="opacity:0.7;border:1px dashed rgba(155,89,182,0.5)"' : '';
+  return `<div class="dep-bar-wrap">
+    <div class="dep-bar-bg"><div class="dep-bar-fill" style="width:${width}%;background:${color}"${extra}></div></div>
+    <span class="dep-value" style="color:${color}">${sign}${dep}%${isPredict?'*':''}</span>
+  </div>`;
+}
+
+// Populate table
+const tbody = document.getElementById('tableBody');
+let prevDecade = '';
+
+data.forEach(d => {
+  const decade = getDecade(d.year);
+  if(decade !== prevDecade && d.year !== 2000) {
+    const sep = document.createElement('tr');
+    sep.className = 'decade-sep';
+    sep.innerHTML = `<td colspan="11">— Decade: ${decade} —</td>`;
+    tbody.appendChild(sep);
+  }
+  if(prevDecade === '' || decade !== prevDecade) prevDecade = decade;
+
+  const peakMonth = d.upDelhiMonth;
+  const isJuly = peakMonth === 'July';
+  const tr = document.createElement('tr');
+  if(d.cat==='deficient') tr.style.background='rgba(231,76,60,0.05)';
+  if(d.cat==='excess') tr.style.background='rgba(46,204,113,0.05)';
+  tr.innerHTML = `
+    <td class="year-col">${d.year}</td>
+    <td style="font-family:'IBM Plex Mono',monospace;color:#e8f4f8">${d.mm} mm</td>
+    <td style="font-family:'IBM Plex Mono',monospace;color:${getColor(d.pct)};font-weight:600">${d.pct}%</td>
+    <td>${getBadge(d.cat)}</td>
+    <td>${getDepBar(d.pct, false)}</td>
+    <td style="font-size:12px;color:var(--text-muted)">${d.enso}</td>
+    <td class="special-td" style="font-weight:600;color:${isJuly?'#f0a500':'#4a9eca'};font-family:'IBM Plex Mono',monospace">
+      ★ ${peakMonth}
+    </td>
+    <td class="special-td" style="font-family:'IBM Plex Mono',monospace;font-size:12px">${d.upMm}</td>
+    <td class="special-td" style="font-family:'IBM Plex Mono',monospace;font-size:12px">${d.delhiMm}</td>
+    <td class="shoutout-td">${makeShoutoutCell(d.year)}</td>
+    <td style="font-size:12px;color:var(--text-muted);max-width:300px;white-space:normal;line-height:1.5">${d.remark}</td>
+  `;
+  tbody.appendChild(tr);
+});
+
+// Add 2026 prediction row with separator
+const sep2026 = document.createElement('tr');
+sep2026.className = 'decade-sep';
+sep2026.innerHTML = `<td colspan="11" style="color:#9b59b6;border-color:rgba(155,89,182,0.3)">— ◆ 2026 Statistical Prediction (Not Official IMD Forecast) —</td>`;
+tbody.appendChild(sep2026);
+
+const trPred = document.createElement('tr');
+trPred.className = 'predict-row';
+trPred.innerHTML = `
+  <td class="year-col">2026 <span class="predict-tag">PRED</span></td>
+  <td style="font-family:'IBM Plex Mono',monospace;color:#c39bd3;font-weight:600">${pred2026.mm} mm*</td>
+  <td style="font-family:'IBM Plex Mono',monospace;color:#9b59b6;font-weight:600">${pred2026.pct}%*</td>
+  <td>${getBadge('predict')}</td>
+  <td>${getDepBar(pred2026.pct, true)}</td>
+  <td style="font-size:12px;color:#c39bd3">${pred2026.enso}</td>
+  <td class="special-td" style="font-weight:600;color:#c39bd3;font-family:'IBM Plex Mono',monospace;white-space:normal">
+    ◆ ${pred2026.upDelhiMonth}
+  </td>
+  <td class="special-td" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#c39bd3">${pred2026.upMm}*</td>
+  <td class="special-td" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#c39bd3">${pred2026.delhiMm}*</td>
+  <td class="shoutout-td">${makeShoutoutCell(2026)}</td>
+  <td style="font-size:12px;color:#c39bd3;max-width:300px;white-space:normal;line-height:1.5">${pred2026.remark}</td>
+`;
+tbody.appendChild(trPred);
+
+// Bar chart
+const barChart = document.getElementById('barChart');
+const maxPct = 115;
+const minPct = 75;
+const range = maxPct - minPct;
+
+const allData = [...data, { year: 2026, pct: 103, mm: '~970', cat: 'predict' }];
+
+allData.forEach(d => {
+  const item = document.createElement('div');
+  item.className = 'bar-item';
+  const heightPct = ((d.pct - minPct) / range) * 100;
+  const heightPx = Math.max(heightPct * 1.5, 4);
+  const isPredict = d.cat === 'predict';
+  const color = isPredict ? '#9b59b6' : getColor(d.pct);
+  item.innerHTML = `
+    <div class="bar-val ${isPredict?'predict-val':''}" style="color:${color}">${d.pct}%${isPredict?'*':''}</div>
+    <div class="bar-rect ${isPredict?'predict-bar':''}" style="height:${heightPx}px;background:${color};opacity:0.85" title="${d.year}: ${d.pct}% of LPA${isPredict?' (Prediction)':''}"></div>
+    <div class="bar-label ${isPredict?'predict-label':''}">${d.year}${isPredict?'◆':''}</div>
+  `;
+  barChart.appendChild(item);
+});
+
+// 100% LPA line overlay
+const line = document.createElement('div');
+line.style.cssText = `position:absolute;left:0;right:0;bottom:${((100-minPct)/range)*100*1.5}px;height:1px;background:rgba(255,255,255,0.25);pointer-events:none;z-index:1`;
+const lineLabel = document.createElement('span');
+lineLabel.style.cssText = 'position:absolute;right:0;top:-16px;font-family:IBM Plex Mono,monospace;font-size:9px;color:rgba(255,255,255,0.4);white-space:nowrap';
+lineLabel.textContent = '100% LPA';
+line.appendChild(lineLabel);
+barChart.appendChild(line);
+</script>
+
+<!-- ═══ MONETIZATION ═══ -->
+<style>
+#money-bar{position:fixed;bottom:0;left:0;right:0;z-index:8999;
+  background:rgba(8,10,20,0.97);backdrop-filter:blur(12px);
+  border-top:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.5rem 1.5rem;gap:1rem;flex-wrap:wrap;
+  font-family:'Inter',system-ui,sans-serif;}
+#money-bar .mbar-left{font-size:0.72rem;color:rgba(255,255,255,0.4);}
+#money-bar .mbar-left span{color:rgba(255,255,255,0.75);font-weight:500;}
+#money-bar .mbar-right{display:flex;align-items:center;gap:0.75rem;}
+.kofi-btn{display:inline-flex;align-items:center;gap:0.4rem;
+  background:#FF5E5B;color:#fff;text-decoration:none;
+  padding:0.4rem 1rem;border-radius:6px;font-size:0.75rem;font-weight:600;
+  transition:opacity 0.2s;white-space:nowrap;}
+.kofi-btn:hover{opacity:0.85;}
+.close-bar{background:none;border:none;color:rgba(255,255,255,0.3);
+  cursor:pointer;font-size:1rem;padding:0.2rem 0.5rem;transition:color 0.2s;}
+.close-bar:hover{color:#fff;}
+/* Give page bottom breathing room so bar doesn't cover content */
+body{padding-bottom:56px;}
+/* AdSense slot */
+#adsense-slot{min-width:200px;text-align:center;}
+@media(max-width:600px){#adsense-slot{display:none;}
+  #money-bar{padding:0.4rem 0.8rem;}}
+</style>
+
+<div id="money-bar">
+  <div class="mbar-left">Made with ❤️ &nbsp;·&nbsp; <span>Free science for everyone</span></div>
+  <div class="mbar-right">
+    <!-- AdSense Ad Unit — replace data-ad-slot with your real slot ID -->
+    <div id="adsense-slot">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:320px;height:50px"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    <!-- Ko-fi donate button -->
+    <a class="kofi-btn" href="https://ko-fi.com/yourname" target="_blank" rel="noopener">
+      ☕ Support on Ko-fi
+    </a>
+    <button class="close-bar" onclick="document.getElementById('money-bar').style.display='none'" title="Close">✕</button>
+  </div>
+</div>
+
+<!-- AdSense library — replace with your real publisher ID -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SciSims — Interactive Science Simulations</title>
+<meta name="description" content="Free interactive science simulations — quantum physics, Einstein's experiments, India rainfall data and forecasts. Learn by doing.">
+<meta name="keywords" content="science simulations, physics interactive, quantum mechanics, Einstein experiments, India rainfall, free education">
+<meta property="og:title" content="SciSims — Interactive Science Simulations">
+<meta property="og:description" content="Free interactive science simulations — quantum physics, Einstein, India rainfall data.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ink:#07090f;--paper:#f0ece2;--gold:#c9a84c;--rust:#b84c22;
+  --muted:#5a5a6e;--card-bg:#0e1020;--border:rgba(255,255,255,0.07);
+}
+html{scroll-behavior:smooth;}
+body{background:var(--ink);color:var(--paper);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:70px;}
+
+/* NAV */
+#sci-nav{position:sticky;top:0;z-index:9000;background:rgba(7,9,15,0.97);
+  backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,0.07);
+  padding:0.55rem 1.5rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;
+  font-size:0.72rem;letter-spacing:0.04em;}
+#sci-nav a{color:rgba(255,255,255,0.5);text-decoration:none;padding:0.3rem 0.7rem;border-radius:4px;transition:all 0.2s;white-space:nowrap;}
+#sci-nav a:hover{color:#fff;background:rgba(255,255,255,0.07);}
+#sci-nav a.active{color:#f0854a;border-bottom:1px solid #f0854a;}
+.nav-brand{font-weight:700;color:#fff;margin-right:0.5rem;font-size:0.78rem;}
+
+/* HERO */
+#hero{min-height:90vh;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;text-align:center;padding:4rem 2rem;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 50%,rgba(201,168,76,0.05),transparent 60%),
+             radial-gradient(ellipse at 70% 30%,rgba(184,76,34,0.04),transparent 50%),#07090f;}
+.hero-tag{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.5em;
+  color:var(--gold);text-transform:uppercase;margin-bottom:1.5rem;position:relative;
+  animation:fadeUp 1s ease both;}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(3rem,9vw,7rem);
+  font-weight:900;line-height:0.95;letter-spacing:-0.02em;position:relative;
+  animation:fadeUp 1s 0.15s ease both;}
+.hero-title em{font-style:italic;color:var(--gold);}
+.hero-sub{max-width:540px;margin:1.5rem auto 0;font-size:clamp(1rem,2vw,1.2rem);
+  color:rgba(240,236,226,0.55);line-height:1.7;font-weight:300;position:relative;
+  animation:fadeUp 1s 0.3s ease both;}
+.hero-cta{margin-top:2.5rem;position:relative;animation:fadeUp 1s 0.45s ease both;
+  display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;}
+.btn-primary{font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;
+  text-transform:uppercase;padding:0.75rem 1.8rem;background:var(--gold);
+  color:#0a0a0f;border:none;border-radius:3px;cursor:pointer;text-decoration:none;
+  font-weight:700;transition:all 0.2s;}
+.btn-primary:hover{background:var(--rust);color:#fff;}
+.btn-outline{font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;
+  text-transform:uppercase;padding:0.75rem 1.8rem;background:transparent;
+  color:var(--gold);border:1px solid var(--gold);border-radius:3px;cursor:pointer;
+  text-decoration:none;transition:all 0.2s;}
+.btn-outline:hover{background:var(--gold);color:#0a0a0f;}
+.hero-line{width:1px;height:60px;background:linear-gradient(to bottom,var(--gold),transparent);margin:3rem auto 0;position:relative;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* STATS BAR */
+.stats-bar{display:flex;justify-content:center;gap:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.stat-item{flex:1;max-width:200px;text-align:center;padding:1.5rem 1rem;border-right:1px solid var(--border);}
+.stat-item:last-child{border-right:none;}
+.stat-n{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--gold);}
+.stat-l{font-size:0.75rem;color:rgba(240,236,226,0.4);margin-top:0.25rem;letter-spacing:0.05em;}
+
+/* SECTION LABEL */
+.section-label{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.5em;
+  text-transform:uppercase;color:var(--gold);text-align:center;
+  padding:3rem 0 1.5rem;opacity:0.7;}
+
+/* CARDS GRID */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:1px;background:var(--border);margin:0;}
+.card{background:var(--card-bg);padding:2.5rem 2rem;text-decoration:none;
+  color:var(--paper);display:flex;flex-direction:column;gap:0.75rem;
+  position:relative;overflow:hidden;transition:background 0.25s;}
+.card::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 0% 100%,rgba(201,168,76,0.03),transparent 70%);
+  opacity:0;transition:opacity 0.3s;}
+.card:hover{background:#111525;}
+.card:hover::before{opacity:1;}
+.card-tag{font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.35em;
+  text-transform:uppercase;color:var(--gold);}
+.card-num{font-family:'Space Mono',monospace;font-size:3.5rem;font-weight:700;
+  color:rgba(201,168,76,0.06);position:absolute;top:1rem;right:1.5rem;line-height:1;}
+.card-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;
+  line-height:1.15;letter-spacing:-0.01em;}
+.card-desc{font-size:0.9rem;line-height:1.65;color:rgba(240,236,226,0.5);
+  font-weight:300;max-width:38ch;}
+.card-link{font-family:'Space Mono',monospace;font-size:0.62rem;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--gold);margin-top:auto;padding-top:0.5rem;
+  display:flex;align-items:center;gap:0.5rem;}
+.card-link::after{content:'→';transition:transform 0.2s;}
+.card:hover .card-link::after{transform:translateX(5px);}
+.card-badge{display:inline-block;font-family:'Space Mono',monospace;font-size:0.55rem;
+  letter-spacing:0.15em;padding:0.2rem 0.5rem;border-radius:2px;
+  text-transform:uppercase;margin-bottom:0.25rem;}
+.badge-physics{background:rgba(139,124,248,0.12);color:#a89ef8;border:1px solid rgba(139,124,248,0.2);}
+.badge-data{background:rgba(52,211,153,0.1);color:#34d399;border:1px solid rgba(52,211,153,0.2);}
+
+/* ABOUT STRIP */
+.about-strip{padding:4rem 2rem;max-width:700px;margin:0 auto;text-align:center;}
+.about-strip h2{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;margin-bottom:1rem;}
+.about-strip p{font-size:1rem;line-height:1.75;color:rgba(240,236,226,0.55);font-weight:300;}
+
+/* FOOTER */
+footer{text-align:center;padding:2.5rem 2rem;border-top:1px solid var(--border);
+  font-family:'Space Mono',monospace;font-size:0.62rem;letter-spacing:0.2em;
+  color:rgba(240,236,226,0.3);text-transform:uppercase;}
+footer span{color:var(--gold);}
+
+/* MONEY BAR */
+#money-bar{position:fixed;bottom:0;left:0;right:0;z-index:8999;
+  background:rgba(7,9,15,0.97);backdrop-filter:blur(12px);
+  border-top:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.5rem 1.5rem;gap:1rem;flex-wrap:wrap;font-size:0.72rem;}
+.mbar-left{color:rgba(255,255,255,0.4);}
+.mbar-left span{color:rgba(255,255,255,0.75);font-weight:500;}
+.mbar-right{display:flex;align-items:center;gap:0.75rem;}
+.kofi-btn{display:inline-flex;align-items:center;gap:0.4rem;background:#FF5E5B;
+  color:#fff;text-decoration:none;padding:0.4rem 1rem;border-radius:6px;
+  font-size:0.75rem;font-weight:600;transition:opacity 0.2s;white-space:nowrap;}
+.kofi-btn:hover{opacity:0.85;}
+.close-bar{background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;
+  font-size:1rem;padding:0.2rem 0.5rem;transition:color 0.2s;}
+.close-bar:hover{color:#fff;}
+
+@media(max-width:600px){
+  .stats-bar{flex-wrap:wrap;}
+  .stat-item{min-width:50%;border-bottom:1px solid var(--border);}
+  #money-bar{padding:0.4rem 0.8rem;}
+}
+</style>
+</head>
+<body>
+
+<nav id="sci-nav">
+  <span class="nav-brand">⚛ SciSims</span>
+  <a href="index.html" class="active">Home</a>
+  <a href="einstein_experiments.html">Einstein's Universe</a>
+  <a href="double_slit_experiment.html">Double Slit</a>
+  <a href="photoelectric_effect_simulation.html">Photoelectric Effect</a>
+  <a href="rutherford_gold_foil_experiment.html">Rutherford</a>
+  <a href="india_rainfall_report_25years.html">India Rainfall</a>
+  <a href="india_rainfall_report_2026_prediction.html">2026 Forecast</a>
+</nav>
+
+<section id="hero">
+  <div class="hero-bg"></div>
+  <p class="hero-tag">Free · Interactive · Science</p>
+  <h1 class="hero-title">Science you can<br><em>touch</em></h1>
+  <p class="hero-sub">Live simulations of physics experiments and real-world data — no textbooks, no memorisation. Just explore.</p>
+  <div class="hero-cta">
+    <a href="#simulations" class="btn-primary">Explore Simulations</a>
+    <a href="https://ko-fi.com/yourname" class="btn-outline" target="_blank" rel="noopener">☕ Support Us</a>
+  </div>
+  <div class="hero-line"></div>
+</section>
+
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-n">6</div><div class="stat-l">Live Simulations</div></div>
+  <div class="stat-item"><div class="stat-n">25+</div><div class="stat-l">Years of Data</div></div>
+  <div class="stat-item"><div class="stat-n">100%</div><div class="stat-l">Free to Use</div></div>
+  <div class="stat-item"><div class="stat-n">∞</div><div class="stat-l">Curiosity</div></div>
+</div>
+
+<p class="section-label" id="simulations">Physics Simulations</p>
+
+<div class="cards">
+
+  <a class="card" href="einstein_experiments.html">
+    <span class="card-num">01</span>
+    <span class="card-badge badge-physics">Physics · Interactive</span>
+    <p class="card-tag">Special &amp; General Relativity</p>
+    <h2 class="card-title">Einstein's Universe</h2>
+    <p class="card-desc">Six landmark thought experiments — photoelectric effect, E=mc², twin paradox, gravitational lensing, Brownian motion, and spacetime curvature. All live and interactive.</p>
+    <span class="card-link">Explore</span>
+  </a>
+
+  <a class="card" href="double_slit_experiment.html">
+    <span class="card-num">02</span>
+    <span class="card-badge badge-physics">Quantum Mechanics</span>
+    <p class="card-tag">Wave-Particle Duality</p>
+    <h2 class="card-title">Double Slit Experiment</h2>
+    <p class="card-desc">The experiment that shook physics. Watch interference patterns form, toggle the observer, and see how measurement collapses the quantum wave function in real time.</p>
+    <span class="card-link">Explore</span>
+  </a>
+
+  <a class="card" href="photoelectric_effect_simulation.html">
+    <span class="card-num">03</span>
+    <span class="card-badge badge-physics">Quantum Theory</span>
+    <p class="card-tag">Nobel Prize 1921</p>
+    <h2 class="card-title">Photoelectric Effect</h2>
+    <p class="card-desc">Shine light on a metal surface and watch electrons eject. Adjust frequency and intensity to discover why frequency is the key — not brightness.</p>
+    <span class="card-link">Explore</span>
+  </a>
+
+  <a class="card" href="rutherford_gold_foil_experiment.html">
+    <span class="card-num">04</span>
+    <span class="card-badge badge-physics">Atomic Physics</span>
+    <p class="card-tag">1909 · Nuclear Discovery</p>
+    <h2 class="card-title">Rutherford Gold Foil</h2>
+    <p class="card-desc">Fire alpha particles at gold foil and observe the scattering. Compare the plum pudding model vs the nuclear model — and see why Rutherford was stunned.</p>
+    <span class="card-link">Explore</span>
+  </a>
+
+</div>
+
+<p class="section-label">Data &amp; Reports</p>
+
+<div class="cards">
+
+  <a class="card" href="india_rainfall_report_25years.html">
+    <span class="card-num">05</span>
+    <span class="card-badge badge-data">Data · IMD</span>
+    <p class="card-tag">2000 – 2024 · 25 Years</p>
+    <h2 class="card-title">India Rainfall Report</h2>
+    <p class="card-desc">25 years of monsoon data from the India Meteorological Department — interactive charts, state-wise breakdowns, and trend analysis across the subcontinent.</p>
+    <span class="card-link">View Report</span>
+  </a>
+
+  <a class="card" href="india_rainfall_report_2026_prediction.html">
+    <span class="card-num">06</span>
+    <span class="card-badge badge-data">Forecast · 2026</span>
+    <p class="card-tag">Prediction · IMD Trends</p>
+    <h2 class="card-title">2026 Rainfall Forecast</h2>
+    <p class="card-desc">State-wise monsoon predictions for 2026 based on 25-year IMD trend analysis. Interactive bar charts and regional breakdowns.</p>
+    <span class="card-link">View Forecast</span>
+  </a>
+
+</div>
+
+<div class="about-strip">
+  <h2>Science for everyone</h2>
+  <p>These simulations are built to make complex physics and real-world data genuinely accessible — not just readable, but interactive. Everything here is free, forever. If it helped you learn something, consider buying us a coffee.</p>
+</div>
+
+<footer>
+  <p><span>SciSims</span> &nbsp;·&nbsp; Free Interactive Science &nbsp;·&nbsp; Made with curiosity</p>
+  <p style="margin-top:0.5rem">"The important thing is to not stop questioning." — Einstein</p>
+</footer>
+
+<!-- MONETIZATION BAR -->
+<style>
+#money-bar{position:fixed;bottom:0;left:0;right:0;z-index:8999;
+  background:rgba(7,9,15,0.97);backdrop-filter:blur(12px);
+  border-top:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.5rem 1.5rem;gap:1rem;font-family:'Inter',sans-serif;}
+.kofi-btn{display:inline-flex;align-items:center;gap:0.4rem;background:#FF5E5B;
+  color:#fff;text-decoration:none;padding:0.4rem 1rem;border-radius:6px;
+  font-size:0.75rem;font-weight:600;transition:opacity 0.2s;}
+.kofi-btn:hover{opacity:0.85;}
+.close-bar{background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:1rem;padding:0.2rem 0.5rem;}
+.close-bar:hover{color:#fff;}
+#adsense-slot{min-width:200px;text-align:center;}
+@media(max-width:600px){#adsense-slot{display:none;}}
+</style>
+<div id="money-bar">
+  <div class="mbar-left">Made with ❤️ &nbsp;·&nbsp; <span>Free science for everyone</span></div>
+  <div class="mbar-right">
+    <div id="adsense-slot">
+      <!-- Replace ca-pub-XXXXXXXXXXXXXXXX and data-ad-slot with your real IDs after AdSense approval -->
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:320px;height:50px"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    <a class="kofi-btn" href="https://ko-fi.com/yourname" target="_blank" rel="noopener">☕ Support on Ko-fi</a>
+    <button class="close-bar" onclick="document.getElementById('money-bar').style.display='none'">✕</button>
+  </div>
+</div>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</body>
+</html>

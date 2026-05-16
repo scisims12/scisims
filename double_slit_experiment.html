@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Double Slit Experiment — Quantum Simulator</title>
+  <meta name="description"
+    content="Interactive quantum double-slit experiment simulator. Explore wave-particle duality, interference patterns, and the observer effect.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-primary: #0a0a1a;
+      --bg-card: rgba(255, 255, 255, 0.04);
+      --bg-card-hover: rgba(255, 255, 255, 0.07);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --text-primary: #e8e8f0;
+      --text-secondary: rgba(255, 255, 255, 0.55);
+      --text-muted: rgba(255, 255, 255, 0.35);
+      --accent-purple: #8b7cf8;
+      --accent-purple-dim: rgba(139, 124, 248, 0.15);
+      --accent-orange: #f0854a;
+      --accent-orange-dim: rgba(240, 133, 74, 0.12);
+      --accent-green: #34d399;
+      --accent-green-dim: rgba(52, 211, 153, 0.12);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --shadow-glow: 0 0 40px rgba(139, 124, 248, 0.08);
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      overflow-x: hidden;
+    }
+
+    /* Animated background gradient orbs */
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.3;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(139, 124, 248, 0.25), transparent 70%);
+      top: -100px;
+      left: -100px;
+      animation: floatOrb1 18s ease-in-out infinite;
+    }
+
+    body::after {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(52, 211, 153, 0.2), transparent 70%);
+      bottom: -80px;
+      right: -80px;
+      animation: floatOrb2 22s ease-in-out infinite;
+    }
+
+    @keyframes floatOrb1 {
+
+      0%,
+      100% {
+        transform: translate(0, 0)
+      }
+
+      50% {
+        transform: translate(80px, 60px)
+      }
+    }
+
+    @keyframes floatOrb2 {
+
+      0%,
+      100% {
+        transform: translate(0, 0)
+      }
+
+      50% {
+        transform: translate(-60px, -40px)
+      }
+    }
+
+    .dse {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 780px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-glow), 0 1px 3px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(20px);
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 1.75rem;
+    }
+
+    .header-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent-purple);
+      background: var(--accent-purple-dim);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+
+    .header-tag .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-purple);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: 0.4;
+        transform: scale(0.7)
+      }
+    }
+
+    .header h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff 30%, rgba(139, 124, 248, 0.8));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    /* Mode buttons */
+    .mode-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .mode-btn {
+      position: relative;
+      padding: 9px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .mode-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .mode-btn.active {
+      border-color: rgba(139, 124, 248, 0.4);
+      color: #c4bcff;
+      background: var(--accent-purple-dim);
+      box-shadow: 0 0 20px rgba(139, 124, 248, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .mode-btn.active::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      right: 20%;
+      height: 2px;
+      background: var(--accent-purple);
+      border-radius: 2px 2px 0 0;
+    }
+
+    /* Canvases */
+    .canvases {
+      display: grid;
+      grid-template-columns: 1fr 160px;
+      gap: 10px;
+      margin-bottom: 1.25rem;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      background: #060612;
+    }
+
+    .canvas-wrap canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .canvas-label {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 1.25rem;
+    }
+
+    .stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      text-align: center;
+      transition: background 0.2s;
+    }
+
+    .stat:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 5px;
+    }
+
+    .stat-val {
+      font-size: 18px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      color: var(--text-primary);
+    }
+
+    .stat-val.obs-on {
+      color: var(--accent-orange);
+    }
+
+    .stat-val.obs-off {
+      color: var(--accent-green);
+    }
+
+    /* Insight box */
+    .insight {
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+      border: 1px solid transparent;
+      transition: all 0.35s ease;
+    }
+
+    .insight.wave {
+      background: var(--accent-purple-dim);
+      color: #c4bcff;
+      border-color: rgba(139, 124, 248, 0.2);
+      border-left: 3px solid var(--accent-purple);
+    }
+
+    .insight.particle {
+      background: var(--accent-orange-dim);
+      color: #f8c4a0;
+      border-color: rgba(240, 133, 74, 0.2);
+      border-left: 3px solid var(--accent-orange);
+    }
+
+    .insight.observer {
+      background: var(--accent-green-dim);
+      color: #86efcb;
+      border-color: rgba(52, 211, 153, 0.2);
+      border-left: 3px solid var(--accent-green);
+    }
+
+    /* Action buttons */
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .act-btn {
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .act-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .act-btn.primary {
+      background: var(--accent-purple-dim);
+      color: #c4bcff;
+      border-color: rgba(139, 124, 248, 0.25);
+    }
+
+    .act-btn.primary:hover {
+      background: rgba(139, 124, 248, 0.22);
+    }
+
+    .act-btn svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 600px) {
+      .dse {
+        padding: 1.25rem;
+      }
+
+      .canvases {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .header h1 {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<style>
+#sci-nav{position:sticky;top:0;z-index:9000;background:rgba(8,10,20,0.97);
+  backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,0.07);
+  padding:0.55rem 1.5rem;display:flex;align-items:center;gap:0.5rem;
+  flex-wrap:wrap;font-family:'Inter',system-ui,sans-serif;font-size:0.72rem;
+  letter-spacing:0.04em;}
+#sci-nav a{color:rgba(255,255,255,0.5);text-decoration:none;padding:0.3rem 0.7rem;
+  border-radius:4px;transition:all 0.2s;white-space:nowrap;}
+#sci-nav a:hover{color:#fff;background:rgba(255,255,255,0.07);}
+#sci-nav a.active{color:#f0854a;border-bottom:1px solid #f0854a;}
+#sci-nav .nav-brand{font-weight:700;color:#fff;margin-right:0.5rem;font-size:0.78rem;}
+@media(max-width:600px){#sci-nav{padding:0.4rem 0.8rem;gap:0.3rem;font-size:0.65rem;}}
+</style>
+<nav id="sci-nav">
+  <span class="nav-brand">⚛ SciSims</span>
+  <a href="einstein_experiments.html">Einstein's Universe</a>
+  <a href="double_slit_experiment.html" class="active">Double Slit</a>
+  <a href="photoelectric_effect_simulation.html">Photoelectric Effect</a>
+  <a href="rutherford_gold_foil_experiment.html">Rutherford</a>
+  <a href="india_rainfall_report_25years.html">India Rainfall</a>
+  <a href="india_rainfall_report_2026_prediction.html">2026 Forecast</a>
+</nav>
+
+
+  <div class="dse">
+    <div class="header">
+      <div class="header-tag"><span class="dot"></span> Live Simulation</div>
+      <h1>Double-Slit Experiment</h1>
+      <p>Explore wave-particle duality — switch modes to witness quantum interference and the observer effect in real
+        time.</p>
+    </div>
+
+    <div class="mode-row">
+      <button class="mode-btn active" id="btn-wave" onclick="setMode('wave')">🌊 Wave Mode</button>
+      <button class="mode-btn" id="btn-single" onclick="setMode('single')">⚛ Single Particle</button>
+      <button class="mode-btn" id="btn-observe" onclick="setMode('observe')">👁 Observer ON</button>
+    </div>
+
+    <div class="canvases">
+      <div class="canvas-wrap">
+        <span class="canvas-label">Experiment Chamber</span>
+        <canvas id="main" height="320"></canvas>
+      </div>
+      <div class="canvas-wrap">
+        <span class="canvas-label">Detection Screen</span>
+        <canvas id="screen" width="160" height="320"></canvas>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Particles</div>
+        <div class="stat-val" id="s-fired">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Pattern</div>
+        <div class="stat-val" id="s-pattern">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Observer</div>
+        <div class="stat-val obs-off" id="s-obs">Off</div>
+      </div>
+    </div>
+
+    <div class="insight wave" id="insight"></div>
+
+    <div class="actions">
+      <button class="act-btn primary" onclick="resetSim()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M1 4v6h6" />
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+        </svg>
+        Reset
+      </button>
+      <button class="act-btn"
+        onclick="sendPrompt('What does the wave function collapse mean in the double slit experiment?')">Wave function
+        collapse ↗</button>
+      <button class="act-btn" onclick="sendPrompt('What is quantum superposition?')">Superposition ↗</button>
+    </div>
+  </div>
+
+  <script>
+    const mainCanvas = document.getElementById('main');
+    const screenCanvas = document.getElementById('screen');
+    const mCtx = mainCanvas.getContext('2d');
+    const sCtx = screenCanvas.getContext('2d');
+
+    function resizeMain() {
+      mainCanvas.width = mainCanvas.parentElement.clientWidth || 480;
+      mainCanvas.height = 320;
+    }
+    resizeMain();
+    window.addEventListener('resize', resizeMain);
+
+    let W, H;
+    function getDims() { W = mainCanvas.width; H = mainCanvas.height; }
+    getDims();
+
+    const SW = 160, SH = 320;
+    const SLIT_GAP = 46, SLIT_W = 14;
+
+    function getSlitX() { return mainCanvas.width * 0.52; }
+    const SLIT_MID = 160;
+
+    let mode = 'wave';
+    let particles = [];
+    let screenData = new Float32Array(SH);
+    let fired = 0;
+    let animId;
+    let frameCount = 0;
+
+    const MODES = {
+      wave: { label: 'Interference', obs: 'Off', cls: 'wave', msg: 'Without observation each particle passes through BOTH slits simultaneously as a wave. The waves interfere — peaks add up (bright bands) and troughs cancel (dark bands). This is the interference pattern, proof of wave-like quantum behavior.' },
+      single: { label: 'Building up', obs: 'Off', cls: 'wave', msg: 'Each dot is ONE particle fired alone. At first it looks random — scattered dots. But over hundreds of particles the interference pattern EMERGES. No particle "knows" where the others land — the wave nature guides each one.' },
+      observe: { label: 'Classical', obs: 'ON', cls: 'observer', msg: 'Place a detector to watch which slit the particle uses and the interference pattern VANISHES. Two plain bands appear — exactly like bullets. Observation forces the particle to choose a path, destroying its wave nature.' },
+    };
+
+    function setMode(m) {
+      mode = m;
+      ['wave', 'single', 'observe'].forEach(x => document.getElementById('btn-' + x).classList.toggle('active', x === m));
+      resetSim();
+      updateUI();
+    }
+
+    function updateUI() {
+      getDims();
+      const d = MODES[mode];
+      document.getElementById('s-pattern').textContent = d.label;
+      const obsEl = document.getElementById('s-obs');
+      obsEl.textContent = d.obs;
+      obsEl.className = 'stat-val ' + (mode === 'observe' ? 'obs-on' : 'obs-off');
+      const box = document.getElementById('insight');
+      box.className = 'insight ' + d.cls;
+      box.textContent = d.msg;
+    }
+
+    function resetSim() {
+      getDims();
+      particles = [];
+      screenData = new Float32Array(SH);
+      fired = 0;
+      document.getElementById('s-fired').textContent = '0';
+      mCtx.clearRect(0, 0, W, H);
+      sCtx.clearRect(0, 0, SW, SH);
+    }
+
+    function interferenceY(y) {
+      const SLIT_X = getSlitX();
+      const lambda = 22;
+      const L = W - SLIT_X;
+      const dy = y - SLIT_MID;
+      const theta = Math.atan2(dy, L);
+      const phase = (Math.PI * SLIT_GAP * Math.sin(theta)) / lambda;
+      return Math.pow(Math.cos(phase), 2);
+    }
+
+    function classicalY(y) {
+      const dy = y - SLIT_MID;
+      const p1 = Math.exp(-0.5 * Math.pow((dy - SLIT_GAP / 2) / (SLIT_W * 1.8), 2));
+      const p2 = Math.exp(-0.5 * Math.pow((dy + SLIT_GAP / 2) / (SLIT_W * 1.8), 2));
+      return p1 + p2;
+    }
+
+    function sampleY(fn) {
+      for (let tries = 0; tries < 500; tries++) {
+        const y = Math.random() * SH;
+        if (Math.random() < fn(y)) return y;
+      }
+      return SH / 2;
+    }
+
+    function spawnParticle() {
+      const SLIT_X = getSlitX();
+      let slitY, whichSlit;
+      if (mode === 'observe') {
+        whichSlit = Math.random() < 0.5 ? 1 : -1;
+        slitY = SLIT_MID + whichSlit * SLIT_GAP / 2 + (Math.random() - 0.5) * SLIT_W;
+      } else {
+        whichSlit = 0;
+        slitY = SLIT_MID + (Math.random() < 0.5 ? 1 : -1) * SLIT_GAP / 2 + (Math.random() - 0.5) * SLIT_W;
+      }
+      const targetY = mode === 'observe' ? sampleY(classicalY) : sampleY(interferenceY);
+      fired++;
+      document.getElementById('s-fired').textContent = fired;
+      return {
+        x: 0, y: H / 2 + (Math.random() - 0.5) * 8,
+        slitY, targetY, whichSlit, progress: 0, done: false,
+        color: mode === 'observe' ? (whichSlit > 0 ? '#ff8866' : '#66bbff') : '#a099ee'
+      };
+    }
+
+    function drawBarrier() {
+      const SLIT_X = getSlitX();
+      mCtx.fillStyle = '#181838';
+      mCtx.fillRect(SLIT_X - 4, 0, 8, H);
+      const s1top = SLIT_MID - SLIT_GAP / 2 - SLIT_W / 2;
+      const s1bot = SLIT_MID - SLIT_GAP / 2 + SLIT_W / 2;
+      const s2top = SLIT_MID + SLIT_GAP / 2 - SLIT_W / 2;
+      const s2bot = SLIT_MID + SLIT_GAP / 2 + SLIT_W / 2;
+
+      // Slit glow
+      const grd1 = mCtx.createRadialGradient(SLIT_X, (s1top + s1bot) / 2, 2, SLIT_X, (s1top + s1bot) / 2, 20);
+      grd1.addColorStop(0, 'rgba(139,124,248,0.25)'); grd1.addColorStop(1, 'transparent');
+      mCtx.fillStyle = grd1;
+      mCtx.fillRect(SLIT_X - 20, s1top - 10, 40, s1bot - s1top + 20);
+
+      const grd2 = mCtx.createRadialGradient(SLIT_X, (s2top + s2bot) / 2, 2, SLIT_X, (s2top + s2bot) / 2, 20);
+      grd2.addColorStop(0, 'rgba(139,124,248,0.25)'); grd2.addColorStop(1, 'transparent');
+      mCtx.fillStyle = grd2;
+      mCtx.fillRect(SLIT_X - 20, s2top - 10, 40, s2bot - s2top + 20);
+
+      mCtx.fillStyle = '#060612';
+      mCtx.fillRect(SLIT_X - 4, s1top, 8, s1bot - s1top);
+      mCtx.fillRect(SLIT_X - 4, s2top, 8, s2bot - s2top);
+
+      mCtx.fillStyle = 'rgba(255,255,255,0.25)';
+      mCtx.font = '500 10px Inter, sans-serif';
+      mCtx.fillText('slit 1', SLIT_X + 8, s1top + 10);
+      mCtx.fillText('slit 2', SLIT_X + 8, s2top + 10);
+
+      if (mode === 'observe') {
+        mCtx.fillStyle = '#34d399';
+        mCtx.font = '600 10px Inter, sans-serif';
+        mCtx.fillText('▸ detector', SLIT_X - 68, s1top - 8);
+        mCtx.strokeStyle = 'rgba(52,211,153,0.5)';
+        mCtx.lineWidth = 1;
+        mCtx.setLineDash([4, 4]);
+        mCtx.beginPath();
+        mCtx.moveTo(SLIT_X - 4, s1top - 4);
+        mCtx.lineTo(SLIT_X - 4, s2bot + 4);
+        mCtx.stroke();
+        mCtx.setLineDash([]);
+      }
+    }
+
+    function drawScreen() {
+      sCtx.fillStyle = '#060612';
+      sCtx.fillRect(0, 0, SW, SH);
+      const max = Math.max(...screenData, 1);
+      for (let y = 0; y < SH; y++) {
+        const v = screenData[y] / max;
+        if (v > 0.01) {
+          let r, g, b;
+          if (mode === 'observe') {
+            r = Math.round(200 * v); g = Math.round(100 * v); b = Math.round(60 * v);
+          } else {
+            r = Math.round(130 * v); g = Math.round(110 * v); b = Math.round(248 * v);
+          }
+          sCtx.fillStyle = `rgb(${r},${g},${b})`;
+          sCtx.fillRect(0, y, SW, 1);
+        }
+      }
+    }
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function animate() {
+      getDims();
+      const SLIT_X = getSlitX();
+      mCtx.fillStyle = 'rgba(6,6,18,0.18)';
+      mCtx.fillRect(0, 0, W, H);
+      drawBarrier();
+
+      const rate = mode === 'single' ? 1 : 6;
+      if (frameCount % 2 === 0) {
+        for (let i = 0; i < rate; i++) particles.push(spawnParticle());
+      }
+
+      particles = particles.filter(p => {
+        p.progress += 0.022;
+        const t = Math.min(p.progress, 1);
+        let cx, cy;
+        if (t < 0.5) {
+          const tt = t / 0.5;
+          cx = lerp(p.x, SLIT_X, tt);
+          cy = lerp(p.y, p.slitY, tt);
+        } else {
+          const tt = (t - 0.5) / 0.5;
+          cx = lerp(SLIT_X, W - 1, tt);
+          cy = lerp(p.slitY, p.targetY, tt);
+        }
+
+        // Particle glow
+        const glow = mCtx.createRadialGradient(cx, cy, 0, cx, cy, 6);
+        glow.addColorStop(0, p.color + '55');
+        glow.addColorStop(1, 'transparent');
+        mCtx.fillStyle = glow;
+        mCtx.fillRect(cx - 6, cy - 6, 12, 12);
+
+        mCtx.beginPath();
+        mCtx.arc(cx, cy, 1.8, 0, Math.PI * 2);
+        mCtx.fillStyle = p.color;
+        mCtx.fill();
+
+        if (t >= 1) {
+          const sy = Math.round(p.targetY);
+          if (sy >= 0 && sy < SH) {
+            screenData[sy] += 1;
+            if (sy > 0) screenData[sy - 1] += 0.4;
+            if (sy < SH - 1) screenData[sy + 1] += 0.4;
+          }
+          return false;
+        }
+        return true;
+      });
+
+      if (particles.length > 300) particles.splice(0, particles.length - 300);
+      drawScreen();
+      frameCount++;
+      animId = requestAnimationFrame(animate);
+    }
+
+    function sendPrompt(text) {
+      // Placeholder — integrate with your chat/AI system
+      alert('Prompt: ' + text);
+    }
+
+    updateUI();
+    animate();
+  </script>
+
+
+<!-- ═══ MONETIZATION ═══ -->
+<style>
+#money-bar{position:fixed;bottom:0;left:0;right:0;z-index:8999;
+  background:rgba(8,10,20,0.97);backdrop-filter:blur(12px);
+  border-top:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.5rem 1.5rem;gap:1rem;flex-wrap:wrap;
+  font-family:'Inter',system-ui,sans-serif;}
+#money-bar .mbar-left{font-size:0.72rem;color:rgba(255,255,255,0.4);}
+#money-bar .mbar-left span{color:rgba(255,255,255,0.75);font-weight:500;}
+#money-bar .mbar-right{display:flex;align-items:center;gap:0.75rem;}
+.kofi-btn{display:inline-flex;align-items:center;gap:0.4rem;
+  background:#FF5E5B;color:#fff;text-decoration:none;
+  padding:0.4rem 1rem;border-radius:6px;font-size:0.75rem;font-weight:600;
+  transition:opacity 0.2s;white-space:nowrap;}
+.kofi-btn:hover{opacity:0.85;}
+.close-bar{background:none;border:none;color:rgba(255,255,255,0.3);
+  cursor:pointer;font-size:1rem;padding:0.2rem 0.5rem;transition:color 0.2s;}
+.close-bar:hover{color:#fff;}
+/* Give page bottom breathing room so bar doesn't cover content */
+body{padding-bottom:56px;}
+/* AdSense slot */
+#adsense-slot{min-width:200px;text-align:center;}
+@media(max-width:600px){#adsense-slot{display:none;}
+  #money-bar{padding:0.4rem 0.8rem;}}
+</style>
+
+<div id="money-bar">
+  <div class="mbar-left">Made with ❤️ &nbsp;·&nbsp; <span>Free science for everyone</span></div>
+  <div class="mbar-right">
+    <!-- AdSense Ad Unit — replace data-ad-slot with your real slot ID -->
+    <div id="adsense-slot">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:320px;height:50px"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    <!-- Ko-fi donate button -->
+    <a class="kofi-btn" href="https://ko-fi.com/yourname" target="_blank" rel="noopener">
+      ☕ Support on Ko-fi
+    </a>
+    <button class="close-bar" onclick="document.getElementById('money-bar').style.display='none'" title="Close">✕</button>
+  </div>
+</div>
+
+<!-- AdSense library — replace with your real publisher ID -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</body>
+
+</html>

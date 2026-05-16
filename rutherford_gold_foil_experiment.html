@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Simulate Rutherford's famous gold foil experiment. Watch alpha particles scatter and discover the nuclear model of the atom.">
+  <meta name="keywords" content="Rutherford gold foil experiment, alpha particles, nuclear model, plum pudding model, atomic structure">
+  <meta property="og:title" content="Rutherford Gold Foil Experiment">
+  <meta property="og:description" content="Simulate Rutherford's famous gold foil experiment. Watch alpha particles scatter and discover the nuclear model of the atom.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <title>Rutherford Gold Foil Experiment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #0a0e1a;
+      --surface: #121828;
+      --surface2: #1a2236;
+      --border: #232d44;
+      --text: #e2e8f0;
+      --text2: #8896b3;
+      --accent: #6c8cff;
+      --plum: #e07040;
+      --plum-bg: rgba(224, 112, 64, .1);
+      --plum-border: rgba(224, 112, 64, .35);
+      --ruth: #2dd4a0;
+      --ruth-bg: rgba(45, 212, 160, .1);
+      --ruth-border: rgba(45, 212, 160, .35);
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --blue: #60a5fa;
+      --radius: 12px;
+      --radius-lg: 16px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px
+    }
+
+    .container {
+      max-width: 780px;
+      width: 100%;
+      animation: fadeUp .6s ease
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    h1 {
+      font-size: clamp(1.2rem, 3vw, 1.6rem);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 4px;
+      background: linear-gradient(135deg, var(--accent), var(--ruth));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 20px
+    }
+
+    /* Model toggle */
+    .toggle-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      justify-content: center;
+      flex-wrap: wrap
+    }
+
+    .model-btn {
+      padding: 9px 20px;
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      color: var(--text2);
+      transition: all .25s ease;
+      font-family: inherit;
+      letter-spacing: .3px
+    }
+
+    .model-btn:hover {
+      border-color: var(--text2);
+      color: var(--text)
+    }
+
+    .model-btn.active-plum {
+      border-color: var(--plum);
+      color: var(--plum);
+      background: var(--plum-bg);
+      box-shadow: 0 0 20px rgba(224, 112, 64, .15)
+    }
+
+    .model-btn.active-ruth {
+      border-color: var(--ruth);
+      color: var(--ruth);
+      background: var(--ruth-bg);
+      box-shadow: 0 0 20px rgba(45, 212, 160, .15)
+    }
+
+    /* Canvas */
+    .canvas-wrap {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #070b14;
+      margin-bottom: 16px
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 340px
+    }
+
+    /* Speed controls */
+    .controls-bar {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 6px;
+      z-index: 2
+    }
+
+    .ctrl-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      background: rgba(10, 14, 26, .75);
+      backdrop-filter: blur(8px);
+      color: var(--text2);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+      font-family: inherit
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(30, 40, 70, .8);
+      color: var(--text);
+      border-color: rgba(255, 255, 255, .25)
+    }
+
+    .ctrl-btn.active {
+      color: var(--accent);
+      border-color: var(--accent)
+    }
+
+    .speed-label {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      font-size: 11px;
+      color: var(--text2);
+      background: rgba(10, 14, 26, .7);
+      backdrop-filter: blur(8px);
+      padding: 4px 10px;
+      border-radius: 6px;
+      z-index: 2
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 10px;
+      text-align: center;
+      transition: transform .2s, box-shadow .2s
+    }
+
+    .stat:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .3)
+    }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      margin-bottom: 4px
+    }
+
+    .stat-val {
+      font-size: 22px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums
+    }
+
+    .c-total {
+      color: var(--text)
+    }
+
+    .c-through {
+      color: var(--green)
+    }
+
+    .c-slight {
+      color: var(--yellow)
+    }
+
+    .c-back {
+      color: var(--red)
+    }
+
+    /* Insight box */
+    .insight {
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      line-height: 1.7;
+      margin-bottom: 14px;
+      border-left: 3px solid;
+      transition: all .35s ease
+    }
+
+    .ins-plum {
+      background: var(--plum-bg);
+      color: #f0b090;
+      border-color: var(--plum)
+    }
+
+    .ins-ruth {
+      background: var(--ruth-bg);
+      color: #90e8d0;
+      border-color: var(--ruth)
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text2);
+      transition: all .2s;
+      font-family: inherit
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--text);
+      background: var(--surface2)
+    }
+
+    .btn-reset {
+      border-color: rgba(248, 113, 113, .3);
+      color: var(--red)
+    }
+
+    .btn-reset:hover {
+      background: rgba(248, 113, 113, .1);
+      border-color: var(--red)
+    }
+
+    /* Responsive */
+    @media(max-width:560px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .stat-val {
+        font-size: 18px
+      }
+
+      canvas {
+        height: 260px
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<style>
+#sci-nav{position:sticky;top:0;z-index:9000;background:rgba(8,10,20,0.97);
+  backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,0.07);
+  padding:0.55rem 1.5rem;display:flex;align-items:center;gap:0.5rem;
+  flex-wrap:wrap;font-family:'Inter',system-ui,sans-serif;font-size:0.72rem;
+  letter-spacing:0.04em;}
+#sci-nav a{color:rgba(255,255,255,0.5);text-decoration:none;padding:0.3rem 0.7rem;
+  border-radius:4px;transition:all 0.2s;white-space:nowrap;}
+#sci-nav a:hover{color:#fff;background:rgba(255,255,255,0.07);}
+#sci-nav a.active{color:#f0854a;border-bottom:1px solid #f0854a;}
+#sci-nav .nav-brand{font-weight:700;color:#fff;margin-right:0.5rem;font-size:0.78rem;}
+@media(max-width:600px){#sci-nav{padding:0.4rem 0.8rem;gap:0.3rem;font-size:0.65rem;}}
+</style>
+<nav id="sci-nav">
+  <span class="nav-brand">⚛ SciSims</span>
+  <a href="einstein_experiments.html">Einstein's Universe</a>
+  <a href="double_slit_experiment.html">Double Slit</a>
+  <a href="photoelectric_effect_simulation.html">Photoelectric Effect</a>
+  <a href="rutherford_gold_foil_experiment.html" class="active">Rutherford</a>
+  <a href="india_rainfall_report_25years.html">India Rainfall</a>
+  <a href="india_rainfall_report_2026_prediction.html">2026 Forecast</a>
+</nav>
+
+  <div class="container">
+    <h1>⚛️ Rutherford Gold Foil Experiment</h1>
+    <p class="subtitle">Compare Thomson's prediction vs Rutherford's groundbreaking discovery</p>
+
+    <div class="toggle-row">
+      <button class="model-btn active-plum" id="btn-plum" onclick="setModel('plum')">🍮 Thomson's Plum Pudding</button>
+      <button class="model-btn" id="btn-ruth" onclick="setModel('ruth')">⚛️ Rutherford's Nuclear Model</button>
+    </div>
+
+    <div class="canvas-wrap">
+      <div class="speed-label" id="speed-lbl">1× speed</div>
+      <div class="controls-bar">
+        <button class="ctrl-btn" onclick="changeSpeed(-1)" title="Slower">−</button>
+        <button class="ctrl-btn" onclick="changeSpeed(1)" title="Faster">+</button>
+        <button class="ctrl-btn" id="pauseBtn" onclick="togglePause()" title="Pause/Play">⏸</button>
+      </div>
+      <canvas id="gc"></canvas>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Fired</div>
+        <div class="stat-val c-total" id="s-total">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Passed</div>
+        <div class="stat-val c-through" id="s-through">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Deflected</div>
+        <div class="stat-val c-slight" id="s-slight">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Bounced</div>
+        <div class="stat-val c-back" id="s-back">0</div>
+      </div>
+    </div>
+
+    <div class="insight ins-plum" id="insight-box"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-reset" onclick="resetSim()">↺ Reset</button>
+      <button class="btn" onclick="setModel(model==='plum'?'ruth':'plum')">⇄ Switch Model</button>
+      <button class="btn" onclick="resetSim();setModel('plum');runCompare()">▶ Auto Compare</button>
+    </div>
+  </div>
+
+  <script>
+    const gc = document.getElementById('gc'), ctx = gc.getContext('2d');
+    let W, H, CX, CY, FOIL_X;
+    const NUCLEUS_R = 8, ATOM_R = 56;
+
+    function resize() {
+      const r = gc.getBoundingClientRect();
+      gc.width = r.width * devicePixelRatio; gc.height = r.height * devicePixelRatio;
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+      W = r.width; H = r.height; CX = W * .52; CY = H * .5; FOIL_X = W * .44;
+    }
+    resize();
+    window.addEventListener('resize', () => { resize() });
+
+    let model = 'plum', particles = [], counts = { total: 0, through: 0, slight: 0, back: 0 };
+    let animId, frame = 0, paused = false, speedMul = 1, maxParticles = 800;
+
+    function setModel(m) {
+      model = m;
+      document.getElementById('btn-plum').className = 'model-btn' + (m === 'plum' ? ' active-plum' : '');
+      document.getElementById('btn-ruth').className = 'model-btn' + (m === 'ruth' ? ' active-ruth' : '');
+      resetSim(); updateInsight();
+    }
+
+    function updateInsight() {
+      const b = document.getElementById('insight-box');
+      if (model === 'plum') {
+        b.className = 'insight ins-plum';
+        b.innerHTML = '<strong>Thomson\'s prediction:</strong> The atom is a diffuse sphere of positive charge with electrons scattered throughout — like plums in a pudding. Alpha particles should pass straight through with only tiny deflections. <em>No bounceback expected.</em>';
+      } else {
+        b.className = 'insight ins-ruth';
+        b.innerHTML = '<strong>Rutherford\'s shock:</strong> ~1 in 8,000 alpha particles bounced straight back! Most passed through empty space, a few deflected sharply. This proved the atom has a tiny, dense, positively-charged <strong>nucleus</strong> at its center.';
+      }
+    }
+
+    function resetSim() {
+      particles = []; counts = { total: 0, through: 0, slight: 0, back: 0 }; frame = 0;
+      ['total', 'through', 'slight', 'back'].forEach(k => document.getElementById('s-' + k).textContent = '0');
+      ctx.clearRect(0, 0, W * devicePixelRatio, H * devicePixelRatio);
+    }
+
+    function changeSpeed(d) {
+      const speeds = [.5, 1, 2, 4];
+      let i = speeds.indexOf(speedMul) + d;
+      i = Math.max(0, Math.min(speeds.length - 1, i));
+      speedMul = speeds[i];
+      document.getElementById('speed-lbl').textContent = speedMul + '× speed';
+    }
+
+    function togglePause() {
+      paused = !paused;
+      document.getElementById('pauseBtn').textContent = paused ? '▶' : '⏸';
+    }
+
+    function deflectAngle(b) {
+      if (model === 'plum') return (Math.random() - .5) * .12;
+      const a = Math.abs(b);
+      if (a < NUCLEUS_R * .8) return (b >= 0 ? 1 : -1) * (Math.PI * .85 + Math.random() * .3);
+      if (a < NUCLEUS_R * 2.5) return (b >= 0 ? 1 : -1) * (.6 + Math.random() * .8);
+      if (a < NUCLEUS_R * 6) return (b >= 0 ? 1 : -1) * (.05 + Math.random() * .25);
+      return (Math.random() - .5) * .04;
+    }
+
+    function spawnParticle() {
+      const y = CY + (Math.random() - .5) * (ATOM_R * 2.2);
+      const b = y - CY, angle = deflectAngle(b);
+      const speed = (2.5 + Math.random() * .5) * speedMul;
+      let outcome;
+      if (model === 'plum') outcome = Math.abs(angle) > .05 ? 'slight' : 'through';
+      else {
+        if (Math.abs(angle) > 1.5) outcome = 'back';
+        else if (Math.abs(angle) > .3) outcome = 'slight';
+        else outcome = 'through';
+      }
+      counts.total++; counts[outcome]++;
+      ['total', 'through', 'slight', 'back'].forEach(k => {
+        const el = document.getElementById('s-' + k);
+        el.textContent = counts[k];
+        el.style.transform = 'scale(1.15)'; setTimeout(() => el.style.transform = '', 150);
+      });
+      const colors = { back: '#f87171', slight: '#fbbf24', through: '#60a5fa' };
+      return {
+        x: 40, y, vx: speed * Math.cos(angle), vy: speed * Math.sin(angle),
+        deflected: false, angle, color: colors[outcome], life: 1, outcome, trail: []
+      };
+    }
+
+    function drawGlow(x, y, r, color, alpha) {
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, color.replace(')', ',' + alpha + ')').replace('rgb', 'rgba'));
+      g.addColorStop(1, 'transparent');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function drawAtom() {
+      if (model === 'plum') {
+        // Diffuse positive cloud
+        const g = ctx.createRadialGradient(CX, CY, 0, CX, CY, ATOM_R);
+        g.addColorStop(0, 'rgba(220,150,70,.15)'); g.addColorStop(1, 'rgba(220,150,70,.02)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(CX, CY, ATOM_R, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(220,150,70,.25)'; ctx.lineWidth = 1.5; ctx.stroke();
+        // Scattered electrons
+        const t = frame * .02;
+        for (let i = 0; i < 7; i++) {
+          const a = t + i * Math.PI * 2 / 7, r = ATOM_R * (.3 + .35 * Math.sin(i * 1.7 + t));
+          const ex = CX + Math.cos(a) * r, ey = CY + Math.sin(a) * r;
+          ctx.beginPath(); ctx.arc(ex, ey, 3, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(100,140,255,.7)'; ctx.fill();
+          ctx.fillStyle = 'rgba(100,140,255,.15)'; ctx.beginPath(); ctx.arc(ex, ey, 7, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = 'rgba(220,180,120,.4)'; ctx.font = '600 10px Inter,sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('+ diffuse charge', CX, CY + ATOM_R + 16); ctx.textAlign = 'left';
+      } else {
+        // Empty atom boundary
+        ctx.beginPath(); ctx.arc(CX, CY, ATOM_R, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(100,180,255,.08)'; ctx.lineWidth = 1; ctx.setLineDash([4, 6]); ctx.stroke(); ctx.setLineDash([]);
+        // Nucleus glow
+        const pulse = 1 + .12 * Math.sin(frame * .06);
+        const ng = ctx.createRadialGradient(CX, CY, 0, CX, CY, NUCLEUS_R * 3 * pulse);
+        ng.addColorStop(0, 'rgba(248,113,113,.35)'); ng.addColorStop(.5, 'rgba(248,113,113,.08)'); ng.addColorStop(1, 'transparent');
+        ctx.fillStyle = ng; ctx.beginPath(); ctx.arc(CX, CY, NUCLEUS_R * 3 * pulse, 0, Math.PI * 2); ctx.fill();
+        // Nucleus
+        ctx.beginPath(); ctx.arc(CX, CY, NUCLEUS_R * pulse, 0, Math.PI * 2);
+        const cg = ctx.createRadialGradient(CX - 2, CY - 2, 1, CX, CY, NUCLEUS_R * pulse);
+        cg.addColorStop(0, '#ff8866'); cg.addColorStop(1, '#cc3322');
+        ctx.fillStyle = cg; ctx.fill();
+        // Electron orbits
+        ctx.strokeStyle = 'rgba(100,180,255,.12)'; ctx.lineWidth = .8;
+        for (let i = 0; i < 3; i++) {
+          ctx.save(); ctx.translate(CX, CY); ctx.rotate(i * Math.PI / 3 + frame * .008);
+          ctx.beginPath(); ctx.ellipse(0, 0, ATOM_R * .85, ATOM_R * .3, 0, 0, Math.PI * 2); ctx.stroke();
+          const ea = frame * .03 + i * 2;
+          const ex = Math.cos(ea) * ATOM_R * .85, ey = Math.sin(ea) * ATOM_R * .3;
+          ctx.beginPath(); ctx.arc(ex, ey, 2.5, 0, Math.PI * 2); ctx.fillStyle = 'rgba(96,165,250,.8)'; ctx.fill();
+          ctx.restore();
+        }
+        ctx.fillStyle = 'rgba(255,160,130,.8)'; ctx.font = '600 10px Inter,sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('nucleus', CX, CY + NUCLEUS_R + 14); ctx.textAlign = 'left';
+      }
+    }
+
+    function drawFoil() {
+      const grad = ctx.createLinearGradient(FOIL_X - 3, 0, FOIL_X + 3, 0);
+      grad.addColorStop(0, 'rgba(255,215,0,.02)'); grad.addColorStop(.5, 'rgba(255,215,0,.18)'); grad.addColorStop(1, 'rgba(255,215,0,.02)');
+      ctx.fillStyle = grad; ctx.fillRect(FOIL_X - 4, CY - ATOM_R - 30, 8, (ATOM_R + 30) * 2);
+      ctx.fillStyle = 'rgba(255,215,0,.45)'; ctx.font = '500 10px Inter,sans-serif';
+      ctx.fillText('Au foil', FOIL_X + 8, CY - ATOM_R - 14);
+    }
+
+    function drawSource() {
+      const sg = ctx.createLinearGradient(12, CY - 24, 38, CY + 24);
+      sg.addColorStop(0, '#1e293b'); sg.addColorStop(1, '#334155');
+      ctx.fillStyle = sg;
+      ctx.beginPath(); ctx.roundRect(12, CY - 24, 26, 48, 4); ctx.fill();
+      ctx.strokeStyle = 'rgba(100,200,255,.2)'; ctx.lineWidth = 1; ctx.stroke();
+      // Radiation symbol
+      ctx.fillStyle = 'rgba(96,165,250,.7)'; ctx.font = '600 14px Inter,sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('α', 25, CY + 5); ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(150,180,220,.5)'; ctx.font = '500 9px Inter,sans-serif';
+      ctx.fillText('source', 10, CY + 38);
+    }
+
+    function drawDetector() {
+      ctx.beginPath(); ctx.arc(CX, CY, ATOM_R + 42, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,255,255,.04)'; ctx.lineWidth = 12; ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = 'rgba(180,200,220,.3)'; ctx.font = '500 9px Inter,sans-serif';
+      ctx.fillText('detector', CX + ATOM_R + 48, CY + 4);
+    }
+
+    function animate() {
+      animId = requestAnimationFrame(animate);
+      if (paused) return;
+
+      ctx.fillStyle = 'rgba(7,11,20,.28)'; ctx.fillRect(0, 0, W, H);
+
+      drawDetector(); drawFoil(); drawAtom(); drawSource();
+
+      const spawnRate = Math.max(1, Math.round(4 / speedMul));
+      if (frame % spawnRate === 0 && counts.total < maxParticles) particles.push(spawnParticle());
+
+      particles = particles.filter(p => {
+        if (!p.deflected && p.x >= FOIL_X - 3) p.deflected = true;
+        p.x += p.vx; p.y += p.vy; p.life -= .006;
+        // Trail
+        p.trail.push({ x: p.x, y: p.y, a: p.life });
+        if (p.trail.length > 12) p.trail.shift();
+        for (let i = 0; i < p.trail.length; i++) {
+          const t = p.trail[i], a = (.15 * i / p.trail.length) * t.a;
+          ctx.beginPath(); ctx.arc(t.x, t.y, 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = p.color + Math.round(a * 255).toString(16).padStart(2, '0'); ctx.fill();
+        }
+        // Main particle
+        ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        const alpha = Math.max(0, Math.min(1, p.life));
+        ctx.fillStyle = p.color + Math.round(alpha * 230).toString(16).padStart(2, '0'); ctx.fill();
+        // Glow
+        ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+        ctx.fillStyle = p.color + Math.round(alpha * 40).toString(16).padStart(2, '0'); ctx.fill();
+
+        return p.life > 0 && p.x > -10 && p.x < W + 10 && p.y > -10 && p.y < H + 10;
+      });
+
+      if (particles.length > 250) particles.splice(0, particles.length - 250);
+      frame++;
+    }
+
+    // Auto-compare mode
+    let compareTimer = null;
+    function runCompare() {
+      setModel('plum');
+      compareTimer = setTimeout(() => { setModel('ruth'); }, 6000);
+    }
+
+    updateInsight(); animate();
+  </script>
+
+<!-- ═══ MONETIZATION ═══ -->
+<style>
+#money-bar{position:fixed;bottom:0;left:0;right:0;z-index:8999;
+  background:rgba(8,10,20,0.97);backdrop-filter:blur(12px);
+  border-top:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.5rem 1.5rem;gap:1rem;flex-wrap:wrap;
+  font-family:'Inter',system-ui,sans-serif;}
+#money-bar .mbar-left{font-size:0.72rem;color:rgba(255,255,255,0.4);}
+#money-bar .mbar-left span{color:rgba(255,255,255,0.75);font-weight:500;}
+#money-bar .mbar-right{display:flex;align-items:center;gap:0.75rem;}
+.kofi-btn{display:inline-flex;align-items:center;gap:0.4rem;
+  background:#FF5E5B;color:#fff;text-decoration:none;
+  padding:0.4rem 1rem;border-radius:6px;font-size:0.75rem;font-weight:600;
+  transition:opacity 0.2s;white-space:nowrap;}
+.kofi-btn:hover{opacity:0.85;}
+.close-bar{background:none;border:none;color:rgba(255,255,255,0.3);
+  cursor:pointer;font-size:1rem;padding:0.2rem 0.5rem;transition:color 0.2s;}
+.close-bar:hover{color:#fff;}
+/* Give page bottom breathing room so bar doesn't cover content */
+body{padding-bottom:56px;}
+/* AdSense slot */
+#adsense-slot{min-width:200px;text-align:center;}
+@media(max-width:600px){#adsense-slot{display:none;}
+  #money-bar{padding:0.4rem 0.8rem;}}
+</style>
+
+<div id="money-bar">
+  <div class="mbar-left">Made with ❤️ &nbsp;·&nbsp; <span>Free science for everyone</span></div>
+  <div class="mbar-right">
+    <!-- AdSense Ad Unit — replace data-ad-slot with your real slot ID -->
+    <div id="adsense-slot">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:320px;height:50px"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    <!-- Ko-fi donate button -->
+    <a class="kofi-btn" href="https://ko-fi.com/yourname" target="_blank" rel="noopener">
+      ☕ Support on Ko-fi
+    </a>
+    <button class="close-bar" onclick="document.getElementById('money-bar').style.display='none'" title="Close">✕</button>
+  </div>
+</div>
+
+<!-- AdSense library — replace with your real publisher ID -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+</body>
+
+</html>
