@@ -5,7 +5,7 @@
 
 Browser-based physics simulations and India rainfall visualizations, built with HTML, CSS, and JavaScript.
 
-[**Explore SciSims →**](https://scisims12.github.io/scisims/) · [Browse Experiments](#experiments--reports) · [Report an Issue](https://github.com/scisims12/scisims/issues) · [Support](https://ko-fi.com/scisims)
+[**Explore SciSims →**](https://scisims.mixify.co.in/) · [Browse Experiments](#experiments--reports) · [Report an Issue](https://github.com/scisims12/scisims/issues) · [Support](https://ko-fi.com/scisims)
 
 </div>
 
@@ -21,14 +21,14 @@ The repository currently includes a landing page and **six experiment or report 
 
 | Experience | What you can explore | Open |
 | --- | --- | --- |
-| **Einstein’s Universe** | Photoelectric effect, mass–energy equivalence, twin paradox, gravitational lensing, Brownian motion, and spacetime | [Launch](https://scisims12.github.io/scisims/einstein_experiments.html) |
-| **Double-Slit Experiment** | Switch between wave, single-particle, and observer modes to explore interference | [Launch](https://scisims12.github.io/scisims/double_slit_experiment.html) |
-| **Photoelectric Effect** | Adjust frequency and intensity controls and observe the visual response | [Launch](https://scisims12.github.io/scisims/photoelectric_effect_simulation.html) |
-| **Rutherford Gold Foil** | Compare Thomson’s plum-pudding model with Rutherford’s nuclear model; pause, reset, and adjust animation speed | [Launch](https://scisims12.github.io/scisims/rutherford_gold_foil_experiment.html) |
-| **India Rainfall: 2000–2024** | Explore the historical rainfall report and its monsoon explanations | [View report](https://scisims12.github.io/scisims/india_rainfall_report_25years.html) |
-| **India Rainfall: 2026 Forecast** | Explore the report’s forecast presentation and stated methodology | [View report](https://scisims12.github.io/scisims/india_rainfall_report_2026_prediction.html) |
+| **Einstein’s Universe** | Photoelectric effect, mass–energy equivalence, twin paradox, gravitational lensing, Brownian motion, and spacetime | [Launch](https://scisims.mixify.co.in/einstein_experiments.html) |
+| **Double-Slit Experiment** | Switch between wave, single-particle, and observer modes to explore interference | [Launch](https://scisims.mixify.co.in/double_slit_experiment.html) |
+| **Photoelectric Effect** | Adjust frequency and intensity controls and observe the visual response | [Launch](https://scisims.mixify.co.in/photoelectric_effect_simulation.html) |
+| **Rutherford Gold Foil** | Compare Thomson’s plum-pudding model with Rutherford’s nuclear model; pause, reset, and adjust animation speed | [Launch](https://scisims.mixify.co.in/rutherford_gold_foil_experiment.html) |
+| **India Rainfall: 2000–2024** | Explore the historical rainfall report and its monsoon explanations | [View report](https://scisims.mixify.co.in/india_rainfall_report_25years.html) |
+| **India Rainfall: 2026 Forecast** | Explore the report’s forecast presentation and stated methodology | [View report](https://scisims.mixify.co.in/india_rainfall_report_2026_prediction.html) |
 
-**Start here:** [SciSims homepage](https://scisims12.github.io/scisims/)
+**Start here:** [SciSims homepage](https://scisims.mixify.co.in/)
 
 ## Features
 
@@ -41,7 +41,7 @@ The repository currently includes a landing page and **six experiment or report 
 
 ## Try It
 
-1. Open the [live website](https://scisims12.github.io/scisims/).
+1. Open the [live website](https://scisims.mixify.co.in/).
 2. Choose an experiment or report.
 3. Adjust the available controls and compare what changes.
 4. Read the accompanying explanations to connect the visuals with the concept.
@@ -143,7 +143,7 @@ Created and maintained by **Priyanshu Sharma**.
 
 | Link | Destination |
 | --- | --- |
-| Live SciSims | [scisims12.github.io/scisims](https://scisims12.github.io/scisims/) |
+| Live SciSims | [scisims.mixify.co.in](https://scisims.mixify.co.in/) |
 | Source code | [scisims12/scisims](https://github.com/scisims12/scisims) |
 | GitHub profile | [scisims12](https://github.com/scisims12) |
 | Portfolio | [portfolio.mixify.co.in](https://portfolio.mixify.co.in/) |
